@@ -1,0 +1,32 @@
+# name of device 
+name: se4
+
+# index of output
+output_device: 0
+
+# index of input
+input_device: 1
+
+# name of the pair
+pair_name: se3
+
+# pair idefitier for message headers
+pair_identifier: B
+
+# number of messages this pair will send back and forth
+exchange_count: 200
+
+# protocol
+protocol: 4
+
+# GPT-3 model used
+model: davinci-text-003
+
+# negative values lower pitch, positive values increase it
+pitch: 20
+
+# can be send or receive
+mode: send
+
+# the contectual information to accompany text prompt send to GPT-3
+pre_prompt_send: "Answer this question from the perspective of a house plant: "
