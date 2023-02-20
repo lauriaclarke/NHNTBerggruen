@@ -23,31 +23,58 @@ def copyConfigFile(device):
     scp.close()
 
 def updateGitRepo(device):
-        ipAddress = device + '.local'
+    ipAddress = device + '.local'
 
-        client = SSHClient()
-        client.load_system_host_keys()
-        client.connect(ipAddress, username=device, password=device)
+    client = SSHClient()
+    client.load_system_host_keys()
+    client.connect(ipAddress, username=device, password=device)
+    
+    cmd = "if test -d /home/" + device + "/Documents/NHNTBerggruen; then echo \"1\"; fi"
+    ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
+
+    output = ssh_stdout.readlines()
+    
+    if output[0].strip() == '1':
+        print("updating NHNTBerggruen GitHub repo")
+        input("press ENTER to continue operation or ctrl-C to cancel")
+
+        cmd = "cd /home/" + device + "/Documents/NHNTBerggruen; git fetch https://github.com/lauriaclarke/NHNTBerggruen.git"
+        ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
+    else:
+        print("cloning NHNTBerggruen GitHub repo")
+        input("press ENTER to continue operation or ctrl-C to cancel")
         
-        cmd = "if test -d /home/" + device + "/Documents/NHNTBerggruen; then echo \"1\"; fi"
+        cmd = "git clone https://github.com/lauriaclarke/NHNTBerggruen.git" 
         ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
 
+    client.close()
+
+
+def  runNHNT(device):
+    ipAddress = device + '.local'
+
+    client = SSHClient()
+    client.load_system_host_keys()
+    client.connect(ipAddress, username=device, password=device)
+    
+    cmd = "if test -d /home/" + device + "/Documents/NHNTBerggruen; then echo \"1\"; fi"
+    ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
+
+    output = ssh_stdout.readlines()
+    
+    if output[0].strip() == '1':
+        print("starting NHNT on " + device)
+        input("press ENTER to continue operation or ctrl-C to cancel")
+
+        cmd = "cd /home/" + device + "/Documents/NHNTBerggruen; python3 python/nhnt.py"
+        ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
         output = ssh_stdout.readlines()
-        
-        if output[0] == '1':
-            cmd = "cd /home/" + device + "/Documents/NHNTBerggruen"
-            ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
-            cmd = "git pull origin main"
-            ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
-        else:
-            cmd = "cd /home/" + device + "/Documents/NHNTBerggruen"
-            ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
-            cmd = "git pull origin main"
-            ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
+        print(output)
+    else:
+        print("coult not find the program, please rerun this using: -c update")
+ 
 
-
-        client.close()
-
+    client.close()
 
 def main():
     allDevices = ['se1', 'se2', 'se3', 'se4']
@@ -80,8 +107,14 @@ def main():
             for pi in args.devices:
                 updateGitRepo(pi)
 
-
-
+    # run the stuff
+    if args.cmd == 'run':
+        if args.devices == 'all':
+            for pi in allDevices:
+                runNHNT(pi)
+        else:
+            for pi in args.devices:
+                runNHNT(pi)
 
 
 
