@@ -19,6 +19,9 @@ exchange_count: 200
 # protocol
 protocol: 4
 
+# volume
+volume: 50
+
 # GPT-3 model used
 model: davinci-text-003
 

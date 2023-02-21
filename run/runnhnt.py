@@ -1,9 +1,5 @@
-# scp config files
-# scp python file
-# ssh into devices
-# run python
-# check for errors?
-
+import os
+import datetime
 import argparse
 from paramiko import SSHClient
 from scp import SCPClient
@@ -49,9 +45,13 @@ def updateGitRepo(device):
 
     client.close()
 
-
-def  runNHNT(device):
+def runNHNT(device):
     ipAddress = device + '.local'
+
+    os.makedirs("logs/" + device, exist_ok = True)
+    t = datetime.datetime.now()
+    filename = "logs/" + device + "/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
+    logfile = open(filename, "w")
 
     client = SSHClient()
     client.load_system_host_keys()
@@ -59,7 +59,6 @@ def  runNHNT(device):
     
     cmd = "if test -d /home/" + device + "/Documents/NHNTBerggruen; then echo \"1\"; fi"
     ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
-
     output = ssh_stdout.readlines()
     
     if output[0].strip() == '1':
@@ -67,55 +66,72 @@ def  runNHNT(device):
         input("press ENTER to continue operation or ctrl-C to cancel")
 
         cmd = "cd /home/" + device + "/Documents/NHNTBerggruen; python3 python/nhnt.py"
+
         ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
-        output = ssh_stdout.readlines()
-        print(output)
+
+        logfile.write("--------------------------------\n")
+        logfile.write("STDOUT\n")
+        for line in ssh_stdout.readlines():
+            logfile.write(line)
+
+        errorCount = 0
+        logfile.write("\n--------------------------------\n")
+        logfile.write("STDERR\n")
+        for line in ssh_stderr.readlines():
+            logfile.write(line)
+            errorCount += 1
+
+        if errorCount != 0:
+            print("ERROR: there was an error running the command!")
+            print("ERROR: please check logfile " + filename + " for more info")
+        
     else:
-        print("coult not find the program, please rerun this using: -c update")
+        print("could not find the program, please rerun this using: -c update")
  
+    # TODO get logfile from device with conversation
 
     client.close()
 
-def main():
-    allDevices = ['se1', 'se2', 'se3', 'se4']
-
+def parseArguments():
     # parse input arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--cmd', '-c', default='run', choices=['config', 'run', 'update'], help="specify the command you would like to use, defaults to run")
     parser.add_argument('--devices', '-d', nargs='+', default='all', choices=['all', 'se1', 'se2', 'se3', 'se4'], help="specify which devices to use, defaults to all")
     args = parser.parse_args()
 
+    if args.devices[0] == 'all':
+        devices = ['se1', 'se2', 'se3', 'se4']
+    else:
+        devices = args.devices
+
+    return devices, args.cmd
+
+def main():
+
+    devices, cmd = parseArguments()
+
     # copy config files
-    if args.cmd == 'config':
-        print("would you like to copy CONFIG files to " + str(args.devices) + "?")
+    if cmd == 'config':
+        print("would you like to copy CONFIG files to " + str(devices) + "?")
         input("press ENTER to continue operation or ctrl-C to cancel")
 
         # iterate across all devices executing command
-        if args.devices == 'all':
-            for pi in allDevices:
-                copyConfigFile(pi)
-        else:
-            for pi in args.devices:
-                copyConfigFile(pi)
+        for pi in devices:
+            copyConfigFile(pi)
 
     # update git repo
-    if args.cmd == 'update':
-        if args.devices == 'all':
-            for pi in allDevices:
-                updateGitRepo(pi)
-        else:
-            for pi in args.devices:
-                updateGitRepo(pi)
+    elif cmd == 'update':
+        for pi in devices:
+            updateGitRepo(pi)
 
     # run the stuff
-    if args.cmd == 'run':
-        if args.devices == 'all':
-            for pi in allDevices:
-                runNHNT(pi)
-        else:
-            for pi in args.devices:
-                runNHNT(pi)
+    elif cmd == 'run':
+        for pi in devices:
+            runNHNT(pi)
 
+    else:
+        print("not sure how we got here ooops!")
+        exit()
 
 
 
