@@ -487,7 +487,7 @@ def mp3tonp(f, normalized=False):
         return a.frame_rate, y
 
 def getConfig():
-    username = subprocess.check_output(['whoami'], encoding='utf-8').strip()
+    username = subprocess.check_output(['hostname'], encoding='utf-8').strip()
     configName = "config/" + username + ".yaml"
 
     with open(configName, 'r') as file:

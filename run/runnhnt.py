@@ -48,6 +48,8 @@ def updateGitRepo(device):
 
         cmd = "cd /home/se/Documents/NHNTBerggruen; git pull origin main"
         ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
+        output = ssh_stderr.readlines()
+        print(output)
     else:
         print("cloning NHNTBerggruen GitHub repo")
         input("press ENTER to continue operation or ctrl-C to cancel")
@@ -67,7 +69,7 @@ def runParallel(devices):
     
     print(hosts)
    
-    client = ParallelSSHClient(hosts)
+    client = ParallelSSHClient(hosts, user=USERNAME, password=PASSWORD)
     
     output = client.run_command('uname')
 
