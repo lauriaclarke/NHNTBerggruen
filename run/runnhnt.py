@@ -6,6 +6,7 @@ from scp import SCPClient
 # from multiprocess import Process
 # from multiprocessing import Pool
 from pssh.clients.ssh.parallel import ParallelSSHClient
+from pssh.exceptions import Timeout
 # from gevent import joinall
 
 USERNAME="se"
@@ -63,6 +64,18 @@ def updateGitRepo(device):
     client.close()
 
 def runParallel(devices):
+    # make logfile
+
+    # os.makedirs("logs/" + device, exist_ok = True)
+    # t = datetime.datetime.now()
+    # filename = "logs/" + device + "/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
+    # logfile = open(filename, "w")
+
+    os.makedirs("logs/", exist_ok = True)
+    t = datetime.datetime.now()
+    filename = "logs/run" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
+    logfile = open(filename, "w")
+
     hosts = []
     for d in devices:
         hosts.append(d + '.local')
@@ -71,12 +84,48 @@ def runParallel(devices):
    
     client = ParallelSSHClient(hosts, user=USERNAME, password=PASSWORD)
     
-    output = client.run_command('uname')
+    cmd = "cd /home/se/Documents/NHNTBerggruen; python3 python/nhnt.py"
+    output = client.run_command(cmd)
+    
+    
+    # output = client.run_command(cmd, use_pty=True, read_timeout=1)
 
-    for host_output in output:
-        for line in host_output.stdout:
-            print(line)
-            exit_code = host_output.exit_code
+    # stdout = []
+    # for host_out in output:
+    #     try:
+    #         for line in host_out.stdout:
+    #             stdout.append(line)
+    #     except Timeout:
+    #         pass
+
+    # # Closing channel which has PTY has the effect of terminating
+    # # any running processes started on that channel.
+    # for host_out in output:
+    #     host_out.client.close_channel(host_out.channel)
+    # # Join is not strictly needed here as channel has already been closed and
+    # # command has finished, but is safe to use regardless.
+    # client.join(output)
+    # # Can now read output up to when the channel was closed without blocking.
+    # rest_of_stdout = list(output[0].stdout)
+
+    # for host_output in output:
+    #     for line in host_output.stdout:
+    #         print(line)
+    
+
+    # for host_output in output:
+    #     logfile.write("--------------------------------\n")
+    #     logfile.write("STDOUT\n")
+    #     for line in host_output.stdout:
+    #         logfile.write(line)
+    
+    # for host_output in output:
+    #     logfile.write("--------------------------------\n")
+    #     logfile.write("STDERR\n")
+    #     for line in host_output.stderr:
+    #         logfile.write(line)
+    
+
 
 
 
