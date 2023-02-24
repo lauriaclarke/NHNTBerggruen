@@ -4,24 +4,27 @@ import argparse
 from paramiko import SSHClient
 from scp import SCPClient
 # from multiprocess import Process
-from multiprocessing import Pool
-# from pssh.clients.ssh.parallel import ParallelSSHClient
+# from multiprocessing import Pool
+from pssh.clients.ssh.parallel import ParallelSSHClient
 # from gevent import joinall
 
+USERNAME="se"
+PASSWORD="se"
 
 
 def copyConfigFile(device):
     fileName = "config/" + device + ".yaml"
-    fileNameDest = "/home/" + device + "/NHNTBerggruen/config/" + device + ".yaml"
+    fileNameDest = "/home/se/Documents/NHNTBerggruen/config/" + device + ".yaml"
     ipAddress = device + '.local'
 
+    print("---" + device + "---")
     print("copying " + fileName + " to " + device + "@" + ipAddress)
 
     client = SSHClient()
     client.load_system_host_keys()
-    client.connect(ipAddress, username=device, password=device)
+    client.connect(ipAddress, username=USERNAME, password=PASSWORD)
     with SCPClient(client.get_transport()) as scp:
-        scp.put(fileName, )
+        scp.put(fileName, fileNameDest)
     scp.close()
 
 def updateGitRepo(device):
@@ -29,9 +32,9 @@ def updateGitRepo(device):
 
     client = SSHClient()
     client.load_system_host_keys()
-    client.connect(ipAddress, username=device, password=device)
+    client.connect(ipAddress, username=USERNAME, password=PASSWORD)
     
-    cmd = "if test -d /home/" + device + "/Documents/NHNTBerggruen; then echo \"1\"; fi"
+    cmd = "if test -d /home/se/Documents/NHNTBerggruen; then echo \"1\"; fi"
     ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
 
     output = ssh_stdout.readlines()
@@ -43,33 +46,36 @@ def updateGitRepo(device):
         print("updating NHNTBerggruen GitHub repo")
         input("press ENTER to continue operation or ctrl-C to cancel")
 
-        cmd = "cd /home/" + device + "/Documents/NHNTBerggruen; git pull origin main"
+        cmd = "cd /home/se/Documents/NHNTBerggruen; git pull origin main"
         ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
     else:
         print("cloning NHNTBerggruen GitHub repo")
         input("press ENTER to continue operation or ctrl-C to cancel")
         
-        cmd = "cd /home/" + device + "/Documents/; git clone https://github.com/lauriaclarke/NHNTBerggruen.git" 
+        cmd = "cd /home/se/Documents/; git clone https://github.com/lauriaclarke/NHNTBerggruen.git" 
         ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
+
+        output = ssh_stderr.readlines()
+        print(output)
 
     client.close()
 
-
-# def runParallel(devices):
-#     hosts = []
-#     for d in devices:
-#         hosts.append(d + '.local')
+def runParallel(devices):
+    hosts = []
+    for d in devices:
+        hosts.append(d + '.local')
     
-#     print(type(hosts)
+    print(hosts)
    
-#     client = ParallelSSHClient(hosts, pkey="~/.ssh/syneco")
+    client = ParallelSSHClient(hosts)
     
-#     output = client.run_command('uname')
+    output = client.run_command('uname')
 
-#     for host_output in output:
-#         for line in host_output.stdout:
-#             print(line)
-#         exit_code = host_output.exit_code
+    for host_output in output:
+        for line in host_output.stdout:
+            print(line)
+            exit_code = host_output.exit_code
+
 
 
 def runNHNT(device):
@@ -153,7 +159,8 @@ def main():
 
     # run the stuff
     elif cmd == 'run':
-        processes = []
+        runParallel(devices)
+        # processes = []
 
         # with Pool(len(devices)) as p:
             # pr
