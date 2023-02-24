@@ -35,19 +35,21 @@ def updateGitRepo(device):
     ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
 
     output = ssh_stdout.readlines()
-    
-    if output[0].strip() == '1':
-        print(device)
+     
+    print("---" + device + "---")
+
+    # check if output is an empty list or not 
+    if output:
         print("updating NHNTBerggruen GitHub repo")
         input("press ENTER to continue operation or ctrl-C to cancel")
 
-        cmd = "cd /home/" + device + "/Documents/NHNTBerggruen; git fetch https://github.com/lauriaclarke/NHNTBerggruen.git"
+        cmd = "cd /home/" + device + "/Documents/NHNTBerggruen; git pull origin main"
         ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
     else:
         print("cloning NHNTBerggruen GitHub repo")
         input("press ENTER to continue operation or ctrl-C to cancel")
         
-        cmd = "git clone https://github.com/lauriaclarke/NHNTBerggruen.git" 
+        cmd = "cd /home/" + device + "/Documents/; git clone https://github.com/lauriaclarke/NHNTBerggruen.git" 
         ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
 
     client.close()
