@@ -31,6 +31,7 @@ pip3 install audio2numpy
 pip3 install pyyaml
 pip3 install openai
 pip3 install pyttsx3
+pip3 install pydub
 
 echo "-------------------------------------------"
 echo "linux installs: "

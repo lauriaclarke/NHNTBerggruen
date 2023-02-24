@@ -15,6 +15,9 @@ import pydub
 import librosa
 import yaml
 import subprocess
+from gtts import gTTS
+import audio2numpy as a2n
+
 
 
 MAX_TOKENS=200
@@ -49,22 +52,27 @@ def arrayToString(input):
         output = output + x
     return output 
 
-def getMessagePart(inputText):
-    partRegex = re.compile(r'(\d)[/](\d)') 
+def getMessagePart(inputText, config):
+    partRegex = re.compile(r'(\d)[:](\d)[/](\d)') 
     regexOut = partRegex.search(inputText)
 
     if regexOut == None:
         print("no message marker")
-        return 1, 1, inputText
+        return 0, 1, 1, inputText
     else:
         # extract the message number and and number of parts 
-        msgNumber = regexOut.group(1)
-        msgParts = regexOut.group(2)
-    
-        # strip the part numbers from the message
-        messageText = re.sub('\d[/]\d:', '', inputText)
-    
-        return msgNumber, msgParts, messageText
+        recipient = regexOut.group(1)
+        msgNumber = regexOut.group(2)
+        msgParts = regexOut.group(3)
+
+        if "se" + str(recipient) == config.get("name"):
+            # strip the part numbers from the message
+            messageText = re.sub('\d[:]\d[/]\d:', '', inputText)
+            return recipient, msgNumber, msgParts, messageText
+        else:
+            print("message not meant for me")
+            return 0, 1, 3, inputText
+ 
 
 def py_error_handler(filename, line, function, err, fmt):
     pass
@@ -79,12 +87,15 @@ def alsaErrorHandling():
     asound = cdll.LoadLibrary('libasound.so')
     asound.snd_lib_error_set_handler(c_error_handler)
 
-def sendGGWave(inputText):
+def sendGGWave(config, inputText):
     # split strings that are too long into chunks of length MAX_STRING characters
     # TODO: end on word breaks instead of mid-word
     
     # print(inputText)
     # print(len(inputText))
+
+    # get the recipient number from config file
+    recipient =  re.sub('\D', '', config.get('pair_name'))
 
     toSend = []
     if len(inputText) > MAX_STRING:
@@ -109,16 +120,11 @@ def sendGGWave(inputText):
     # send the array of strings
     for i in range(0, len(toSend)):
 
-        partString = str(i + 1) + "/" + str(len(toSend)) + ": "
-        print(partString)
-
-        # if len(toSend) > 1:
+        header = str(recipient) + ":" + str(i + 1) + "/" + str(len(toSend)) + ": "
         
-        stringToSend = partString + toSend[i]
+        stringToSend = header + toSend[i]
         
-        # generate audio waveform for string "hello python"
-        # waveform = ggwave.encode(toSend[0], protocolId = 1, volume = 50)
-        waveform = ggwave.encode(stringToSend, protocolId = PROTOCOL, volume = 50)
+        waveform = ggwave.encode(stringToSend, protocolId = config.get('protocol'), volume = config.get('volume'))
 
         print("transmitting text... " + toSend[i])
 
@@ -134,6 +140,9 @@ def sendGGWave(inputText):
 def sendGGWaveUT(config, inputText):
 
     os.system("touch hello.mp3")
+
+    # get the recipient number from config file
+    recipient =  re.sub('\D', '', config.get('pair_name'))
 
     # split strings that are too long into chunks of length MAX_STRING characters
     # TODO: end on word breaks instead of mid-word
@@ -161,7 +170,7 @@ def sendGGWaveUT(config, inputText):
     # send the array of strings
     for i in range(0, len(toSend)):
 
-        header = config.get('pair_identifier') + " " + str(i + 1) + "/" + str(len(toSend)) + ": "
+        header = str(recipient) + ":" + str(i + 1) + "/" + str(len(toSend)) + ": "
         print(header)
         
         stringToSend = header + toSend[i]
@@ -171,22 +180,41 @@ def sendGGWaveUT(config, inputText):
     
         ggwaveOut = np.frombuffer(ggwaveWaveform, 'float32')
 
-        engine = pyttsx3.init()
-        engine.save_to_file(stringToSend, "hello.mp3")
-        engine.runAndWait()
+        print("gtts")
+        print(time.perf_counter())
 
-        sampleRate, ttsOut = mp3tonp("hello.mp3")
+        # GTTS
+        ttsWaveform = gTTS(stringToSend)
+        ttsWaveform.save('hello.mp3')
+        
+        print(time.perf_counter())
+        
+        ttsOut, sampleRate = a2n.open_audio('hello.mp3')
+        
+        print(time.perf_counter())
+
+        # PYTTSX3
+        # engine = pyttsx3.init()
+        # engine.save_to_file(stringToSend, "hello.mp3")
+        # engine.runAndWait()
+        # sampleRate, ttsOut = mp3tonp("hello.mp3")
 
         ttsOut = ttsOut.astype('float32')
 
+
+        print("librosa")
+        print(time.perf_counter())
+
         ttsOut = librosa.effects.pitch_shift(ttsOut, sr=48000, n_steps=config.get('pitch'))
 
-        # remove our files 
-        # os.system("rm *.mp3")
+        print(time.perf_counter())
+        
 
         # reformat
         ttsOut32 = np.frombuffer(ttsOut, 'float32')
 
+        print("array size")
+        print(time.perf_counter())
         # make sure they're the same length
         print(len(ttsOut32), len(ggwaveOut))
         if len(ttsOut32) > len(ggwaveOut):
@@ -194,6 +222,8 @@ def sendGGWaveUT(config, inputText):
         else:
             zeroArray = np.zeros(len(ggwaveOut) - len(ttsOut32), dtype=np.float32)
             ttsOut32 = np.append(ttsOut32, zeroArray)
+        
+        print(time.perf_counter())
         
         # format the data into an array appropriately
         finalOutput = [ttsOut32, ggwaveOut]
@@ -252,9 +282,9 @@ def receiveGGWave(config):
                     print('received text: ' + res.decode("utf-8"))
 
                     # get the message number / parts and contents
-                    msgNumber, msgParts, outputTextClean = getMessagePart(outputText)
+                    recipient, msgNumber, msgParts, outputTextClean = getMessagePart(outputText, config)
 
-                    print(msgNumber, msgParts, outputTextClean)
+                    print(recipient, msgNumber, msgParts, outputTextClean)
 
                     # append the cleaned output text to the message array
                     msgs.append(outputTextClean)
@@ -271,6 +301,79 @@ def receiveGGWave(config):
 
     # concatenate all the message parts into a single string
     return arrayToString(msgs)
+
+def receiveGGWaveTimeout(config):
+    timeout = 40
+
+    stream = sd.InputStream(
+        dtype='float32', 
+        device=config.get('input_device'), 
+        channels=1, 
+        samplerate=48000, 
+        blocksize=1024)
+
+    # start the sound decive input stream    
+    stream.start()
+
+    print('listening ... press Ctrl+C to stop')
+
+    # ggwave instace
+    instance = ggwave.init()
+
+    # initialize function to expect three parts
+    msgParts = 3
+    msgNumber = 1
+
+    # array to store the messages 
+    msgs = []
+
+    # keep the start time for timeout
+    startTime = time.time()
+
+    try:
+        # until we've received all parts, call this function
+        while msgNumber < msgParts:
+
+            # get data from the stream
+            data, overflow = stream.read(1024)
+
+            # convert from numpy to bytes  
+            databytes = bytes(data[:, 0])
+
+            # decode the bytes
+            res = ggwave.decode(instance, databytes)
+
+            if time.time() - startTime > timeout:
+                print("exceeded timeout")
+                break
+
+            # if decode is successful
+            if (not res is None):
+                try:
+                    outputText = res.decode("utf-8")
+                    print('received text: ' + res.decode("utf-8"))
+
+                    # get the message number / parts and contents
+                    recipient, msgNumber, msgParts, outputTextClean = getMessagePart(outputText, config)
+
+                    print(recipient, msgNumber, msgParts, outputTextClean)
+
+                    # append the cleaned output text to the message array
+                    msgs.append(outputTextClean)
+
+                except KeyboardInterrupt:
+                    pass
+    except KeyboardInterrupt:
+        pass
+    
+    # successful decode
+    ggwave.free(instance)
+    stream.stop()
+    stream.close()
+
+    # concatenate all the message parts into a single string
+    return arrayToString(msgs)
+
 
 def converseLoop(n_exchange, starterPrompt):
     
@@ -334,12 +437,15 @@ def converseSingle(config, currentResponses):
     responses = responses + currentResponses
 
     # false means we're in receive mode and the plant is asking questions
-    if config.get('mode') == "send":
-        preprompt = prepromptSend
-        model = modelSend
-    else:
-        preprompt = prepromptReceive
-        model = modelReceive
+    # if config.get('mode') == "send":
+    #     preprompt = prepromptSend
+    #     model = modelSend
+    # else:
+    #     preprompt = prepromptReceive
+    #     model = modelReceive
+
+    preprompt = config.get('pre_prompt')
+    model = config.get('model')
 
     prompt = preprompt + responses[-1] + "\n"
     
@@ -465,7 +571,7 @@ def main():
         elif sendReceive == False:
             print("\nreceiving...\n")
 
-            outputText = receiveGGWave(config)
+            outputText = receiveGGWaveTimeout(config)
 
             responses.append(outputText)
 

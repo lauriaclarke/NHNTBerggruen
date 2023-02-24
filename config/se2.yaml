@@ -1,23 +1,32 @@
 # name of device 
 name: se2
 
-# name of the pair
-pair-name: se1
+# index of output
+output_device: 0
 
-# pair idefitier for message headers
-pair-identifier: A
+# index of input
+input_device: 1
+
+# name of the pair
+pair_name: se1
 
 # number of messages this pair will send back and forth
-pair-message-count: 200
+exchange_count: 200
+
+# protocol
+protocol: 1
+
+# volume
+volume: 10
 
 # GPT-3 model used
-model: davinci-text-03
+model: text-davinci-003
 
 # negative values lower pitch, positive values increase it
 pitch: 20
 
 # can be send or receive
-mode: send
+mode: receive
 
 # the contectual information to accompany text prompt send to GPT-3
-pre-prompt: "Answer this question from the perspective of a house plant: "
+pre_prompt: "Ask a question from the perspective of a crop on a farm: "

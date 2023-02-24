@@ -3,6 +3,12 @@ import datetime
 import argparse
 from paramiko import SSHClient
 from scp import SCPClient
+# from multiprocess import Process
+from multiprocessing import Pool
+# from pssh.clients.ssh.parallel import ParallelSSHClient
+# from gevent import joinall
+
+
 
 def copyConfigFile(device):
     fileName = "config/" + device + ".yaml"
@@ -31,6 +37,7 @@ def updateGitRepo(device):
     output = ssh_stdout.readlines()
     
     if output[0].strip() == '1':
+        print(device)
         print("updating NHNTBerggruen GitHub repo")
         input("press ENTER to continue operation or ctrl-C to cancel")
 
@@ -44,6 +51,24 @@ def updateGitRepo(device):
         ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd)
 
     client.close()
+
+
+# def runParallel(devices):
+#     hosts = []
+#     for d in devices:
+#         hosts.append(d + '.local')
+    
+#     print(type(hosts)
+   
+#     client = ParallelSSHClient(hosts, pkey="~/.ssh/syneco")
+    
+#     output = client.run_command('uname')
+
+#     for host_output in output:
+#         for line in host_output.stdout:
+#             print(line)
+#         exit_code = host_output.exit_code
+
 
 def runNHNT(device):
     ipAddress = device + '.local'
@@ -126,8 +151,13 @@ def main():
 
     # run the stuff
     elif cmd == 'run':
-        for pi in devices:
-            runNHNT(pi)
+        processes = []
+
+        # with Pool(len(devices)) as p:
+            # pr
+        # for pi in devices:
+            # processes.append(Process(runNHNT))
+            # runNHNT(pi)
 
     else:
         print("not sure how we got here ooops!")
