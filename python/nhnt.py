@@ -203,8 +203,8 @@ def sendGGWaveUT(config, inputText):
         print(engine.getProperty('volume'))
         engine.save_to_file(stringToSend, "hello.mp3")
         engine.runAndWait()
-        # sampleRate, ttsOut = mp3tonp("hello.mp3")
-        ttsOut, sampleRate = a2n.open_audio('hello.mp3')
+        sampleRate, ttsOut = mp3tonp("hello.mp3")
+        # ttsOut, sampleRate = a2n.open_audio('hello.mp3')
         print(sampleRate)
         
         os.system("rm *.mp3")
