@@ -186,10 +186,10 @@ def sendGGWaveUT(config, inputText):
         # GTTS
         ttsWaveform = gTTS(stringToSend, tld='co.in', slow=True)
         ttsWaveform.save('hello.mp3')
-        # cmd = "ffmpeg -hide_banner -loglevel error -i hello.mp3 -ar 96000 hello48k.mp3"
-        # os.system(cmd)
-        # ttsOut, sampleRate = a2n.open_audio('hello48k.mp3')
-        ttsOut, sampleRate = a2n.open_audio('hello.mp3')
+        cmd = "ffmpeg -hide_banner -loglevel error -i hello.mp3 -ar 40000 hello48k.mp3"
+        os.system(cmd)
+        ttsOut, sampleRate = a2n.open_audio('hello48k.mp3')
+        # ttsOut, sampleRate = a2n.open_audio('hello.mp3')
         os.system("rm *.mp3")
 
         # PYTTSX3
