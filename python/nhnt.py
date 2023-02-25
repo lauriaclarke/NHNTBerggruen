@@ -195,7 +195,7 @@ def sendGGWaveUT(config, inputText):
         # PYTTSX3
         engine = pyttsx3.init()
         volume = engine.getProperty('volume')
-        engine.setProperty('volume', 0.8)
+        engine.setProperty('volume', 1)
         rate = engine.getProperty('rate')
         engine.setProperty('rate', 50)
         engine.runAndWait()
