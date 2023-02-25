@@ -202,12 +202,12 @@ def sendGGWaveUT(config, inputText):
         ttsOut = ttsOut.astype('float32')
 
 
-        print("librosa")
-        print(time.perf_counter())
+        # print("librosa")
+        # print(time.perf_counter())
 
-        ttsOut = librosa.effects.pitch_shift(ttsOut, sr=48000, n_steps=config.get('pitch'))
+        # ttsOut = librosa.effects.pitch_shift(ttsOut, sr=48000, n_steps=config.get('pitch'))
 
-        print(time.perf_counter())
+        # print(time.perf_counter())
         
 
         # reformat
