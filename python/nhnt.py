@@ -184,7 +184,7 @@ def sendGGWaveUT(config, inputText):
         print(time.perf_counter())
 
         # GTTS
-        ttsWaveform = gTTS(stringToSend)
+        ttsWaveform = gTTS(stringToSend, tld=co.in, slow=True)
         ttsWaveform.save('hello.mp3')
         
         print(time.perf_counter())
