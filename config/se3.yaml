@@ -18,7 +18,7 @@ exchange_count: 200
 # 1 - fast 
 # 2 - fastest
 # 4 - fast ultrasonic
-protocol: 1
+protocol: 4
 
 # volume
 volume: 30

@@ -19,7 +19,7 @@ from gtts import gTTS
 import audio2numpy as a2n
 
 
-
+TIMEOUT=20
 MAX_TOKENS=200
 MAX_STRING=140
 
