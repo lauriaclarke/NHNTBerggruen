@@ -184,29 +184,22 @@ def sendGGWaveUT(config, inputText):
         print(time.perf_counter())
 
         # GTTS
-        ttsWaveform = gTTS(stringToSend, tld='co.in', slow=True)
-        ttsWaveform.save('hello.mp3')
-        
-        print(time.perf_counter())
-        
-        ttsOut, sampleRate = a2n.open_audio('hello.mp3')
-        
-        print(time.perf_counter())
+        # ttsWaveform = gTTS(stringToSend, tld='co.in', slow=True)
+        # ttsWaveform.save('hello.mp3')
+        # ttsOut, sampleRate = a2n.open_audio('hello.mp3')
 
         # PYTTSX3
-        # engine = pyttsx3.init()
-        # engine.save_to_file(stringToSend, "hello.mp3")
-        # engine.runAndWait()
-        # sampleRate, ttsOut = mp3tonp("hello.mp3")
+        engine = pyttsx3.init()
+        engine.save_to_file(stringToSend, "hello.mp3")
+        engine.runAndWait()
+        sampleRate, ttsOut = mp3tonp("hello.mp3")
 
         ttsOut = ttsOut.astype('float32')
 
 
         # print("librosa")
         # print(time.perf_counter())
-
         # ttsOut = librosa.effects.pitch_shift(ttsOut, sr=48000, n_steps=config.get('pitch'))
-
         # print(time.perf_counter())
         
 
