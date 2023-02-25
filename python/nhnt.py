@@ -195,7 +195,7 @@ def sendGGWaveUT(config, inputText):
         # PYTTSX3
         engine = pyttsx3.init()
         volume = engine.getProperty('volume')
-        engine.setProperty('volume', 0.5)
+        engine.setProperty('volume', 0.8)
         rate = engine.getProperty('rate')
         engine.setProperty('rate', 50)
         engine.runAndWait()
@@ -205,6 +205,7 @@ def sendGGWaveUT(config, inputText):
         engine.runAndWait()
         # sampleRate, ttsOut = mp3tonp("hello.mp3")
         ttsOut, sampleRate = a2n.open_audio('hello.mp3')
+        print(sampleRate)
 
         ttsOut = ttsOut.astype('float32')
 
