@@ -190,6 +190,12 @@ def sendGGWaveUT(config, inputText):
 
         # PYTTSX3
         engine = pyttsx3.init()
+        
+        volume = engine.getProperty('volume')
+        engine.setProperty('volume', volume-0.25)
+        rate = engine.getProperty('rate')
+        engine.setProperty('rate', rate+50)
+
         engine.save_to_file(stringToSend, "hello.mp3")
         engine.runAndWait()
         sampleRate, ttsOut = mp3tonp("hello.mp3")
