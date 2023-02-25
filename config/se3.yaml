@@ -21,7 +21,7 @@ exchange_count: 200
 protocol: 1
 
 # volume
-volume: 20
+volume: 30
 
 # GPT-3 model used
 model: text-davinci-003
