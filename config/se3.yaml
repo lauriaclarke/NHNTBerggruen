@@ -30,7 +30,7 @@ model: text-davinci-003
 pitch: -5
 
 # can be send or receive
-mode: send
+mode: receive
 
 # the contectual information to accompany text prompt send to GPT-3
 pre_prompt: "respond to this statement from the perspective of a wild plant outside: "
