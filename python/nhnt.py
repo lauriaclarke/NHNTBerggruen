@@ -381,7 +381,6 @@ def receiveGGWaveTimeout(config):
     # concatenate all the message parts into a single string
     return arrayToString(msgs)
 
-
 def converseLoop(n_exchange, starterPrompt):
     
     responses = []
@@ -472,9 +471,12 @@ def converseSingle(config, currentResponses):
 
 def waitForStart(config):
     print("waiting for start command...")
-    while True:
-        if(receiveGGWave(config) == "start"):
-            break
+    try:
+        while True:
+            if(receiveGGWave(config) == "start"):
+                break
+    except KeyboardInterrupt:
+        break
 
 def rxtxrxTest(config):
     outputText = receiveGGWave(config)
