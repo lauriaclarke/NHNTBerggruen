@@ -299,7 +299,7 @@ def receiveGGWave(config):
                 except KeyboardInterrupt:
                     pass
     except KeyboardInterrupt:
-        pass
+        exit()
     
     # successful decode
     ggwave.free(instance)

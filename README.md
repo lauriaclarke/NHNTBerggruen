@@ -7,6 +7,8 @@ Installation at the Berggruen Institute, Spring 2023
 ## Instructions
 
 0. make sure you're on the hotspot WiFi
+    - SSID: NHNTLocal
+    - PW: nhntl0cal
 
 1. make sure configuration files are pushed to github
     - check you're in the top level of the repo <your path>/NHNTBerggruen
@@ -21,7 +23,10 @@ Installation at the Berggruen Institute, Spring 2023
 
 2. run update script
     - check you're in the top level of the repo then run the updater script
-        > ```python3 run/runnhnt.py -c update -d <devices you want to update>```
+    - example for updating se4 and se5:
+        > ```python3 run/runnhnt.py -c update -d se4 se5```
+    - example for updating all devices:
+        > ```python3 run/runnhnt.py -c update -d all```
     - press enter as asked
     - make sure the commit hash matches as expected 
 
@@ -29,10 +34,10 @@ Installation at the Berggruen Institute, Spring 2023
     > ```ssh se@<device>.local```
     
 4. run the python script to start them
-    - python3 Documents/NHNTBerggruen/python/nhnt.py 
+    > ```python3 Documents/NHNTBerggruen/python/nhnt.py```
 
 5. give the start command
-    - use ultrasonic protocol on waver
+    - use ultrasonic protocol on waver and send "start"
 
 6. make sure they start
     - you need to do a little hand holding for the start command and the first exchange
@@ -43,7 +48,9 @@ Installation at the Berggruen Institute, Spring 2023
     - the conversation will be saved as a log file on each device
     - these are just timestamped...the time is probably really wrong, but the date should be OK
     - ssh into the device you want
-    - cd Documents/NHNTBerggruen/logs
-    - ls to find the one you want, or just copy all of them
-    - run scp from your computer: scp -r se@<device>.local:/home/se/Documents/NHNTBerggruen/logs <path to where you want them on your computer>
+    - ssh into the device and look for the logs you want, or just copy all of them
+    - to copy all: 
+        >```scp -r se@<device>.local:/home/se/Documents/NHNTBerggruen/logs <destination path>```
+    - to copy one: 
+        >```scp se@<device>.local:/home/se/Documents/NHNTBerggruen/logs/<filename> <destination path>```
  
