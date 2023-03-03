@@ -206,7 +206,7 @@ def main():
 
     # run the stuff
     elif cmd == 'run':
-        runParallel(devices)
+        # runParallel(devices)
         # processes = []
 
         # with Pool(len(devices)) as p:
