@@ -27,30 +27,30 @@ Installation at the Berggruen Institute, Spring 2023
 1. make sure configuration files are pushed to github
     - check you're in the top level of the repo <your path>/NHNTBerggruen
     - run the following commands to commit:
-        ```git add .```
+        > ```git add .```
 
-        ```git commit -m "you changes"```
+        > ```git commit -m "you changes"```
 
-        ```git push origin main```
+        > ```git push origin main```
 
 
 
 2. run update script
     - check you're in the top level of the repo then run the updater script
     - example for updating se4 and se5:
-        ```python3 run/runnhnt.py -c update -d se4 se5```
+        > ```python3 run/runnhnt.py -c update -d se4 se5```
     - example for updating all devices:
-        ```python3 run/runnhnt.py -c update -d all```
+        > ```python3 run/runnhnt.py -c update -d all```
     - press enter as asked
     - make sure the commit hash matches as expected 
 
 3. ssh into the devices you want to start
-    ```ssh se@<device>.local```
+    > ```ssh se@<device>.local```
     - for example to ssh into se4:
-    ```ssh se@se4.local```
+    > ```ssh se@se4.local```
     
 4. run the python script to start them
-    ```python3 Documents/NHNTBerggruen/python/nhnt.py```
+    > ```python3 Documents/NHNTBerggruen/python/nhnt.py```
 
 5. give the start command
     - use ultrasonic protocol on waver and send "start"
