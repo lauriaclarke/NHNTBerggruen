@@ -26,7 +26,7 @@ Installation at the Berggruen Institute, Spring 2023
 
 1. make sure configuration files are pushed to github
     - check you're in the top level of the repo <your path>/NHNTBerggruen
-    - run the following commands:
+    - run the following commands to commit:
         > ```git add .```
 
         > ```git commit -m "you changes"```
@@ -46,6 +46,8 @@ Installation at the Berggruen Institute, Spring 2023
 
 3. ssh into the devices you want to start
     > ```ssh se@<device>.local```
+    - for example to ssh into se4:
+    > ```ssh se@se4.local
     
 4. run the python script to start them
     > ```python3 Documents/NHNTBerggruen/python/nhnt.py```
