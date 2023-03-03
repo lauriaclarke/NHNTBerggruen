@@ -1,4 +1,4 @@
-# name of device 
+# name of device
 name: se4
 
 # index of output
@@ -14,7 +14,7 @@ pair_name: se5
 exchange_count: 200
 
 # protocol
-protocol: 1
+protocol: 4
 
 # volume
 volume: 30
