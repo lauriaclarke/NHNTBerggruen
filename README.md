@@ -47,7 +47,7 @@ Installation at the Berggruen Institute, Spring 2023
 3. ssh into the devices you want to start
     > ```ssh se@<device>.local```
     - for example to ssh into se4:
-    > ```ssh se@se4.local
+    > ```ssh se@se4.local```
     
 4. run the python script to start them
     > ```python3 Documents/NHNTBerggruen/python/nhnt.py```
