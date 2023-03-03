@@ -125,10 +125,6 @@ def runParallel(devices):
     #     for line in host_output.stderr:
     #         logfile.write(line)
     
-
-
-
-
 def runNHNT(device):
     ipAddress = device + '.local'
 
@@ -180,11 +176,11 @@ def parseArguments():
     # parse input arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--cmd', '-c', default='run', choices=['config', 'run', 'update'], help="specify the command you would like to use, defaults to run")
-    parser.add_argument('--devices', '-d', nargs='+', default='all', choices=['all', 'se1', 'se2', 'se3', 'se4'], help="specify which devices to use, defaults to all")
+    parser.add_argument('--devices', '-d', nargs='+', default='all', choices=['all', 'se1', 'se2', 'se3', 'se4', 'se5'], help="specify which devices to use, defaults to all")
     args = parser.parse_args()
 
     if args.devices[0] == 'all':
-        devices = ['se1', 'se2', 'se3', 'se4']
+        devices = ['se1', 'se2', 'se3', 'se4', 'se5']
     else:
         devices = args.devices
 
