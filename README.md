@@ -6,20 +6,27 @@ Installation at the Berggruen Institute, Spring 2023
 
 ## Instructions
 
+0. make sure you're on the hotspot WiFi
+
 1. make sure configuration files are pushed to github
-    - check you're in the top level of the repo
-    - git add .
-    - git commit -m "you changes"
-    - git push origin main
+    - check you're in the top level of the repo <your path>/NHNTBerggruen
+    - run the following commands:
+        > ```git add .```
+
+        > ```git commit -m "you changes"```
+
+        > ```git push origin main```
+
+
 
 2. run update script
-    - check you're in the top level of the repo
-    - python3 run/runnhnt.py -c update -d <devices you want to update>
+    - check you're in the top level of the repo then run the updater script
+        > ```python3 run/runnhnt.py -c update -d <devices you want to update>```
     - press enter as asked
     - make sure the commit hash matches as expected 
 
 3. ssh into the devices you want to start
-    - ssh se@<device>.local
+    > ```ssh se@<device>.local```
     
 4. run the python script to start them
     - python3 Documents/NHNTBerggruen/python/nhnt.py 

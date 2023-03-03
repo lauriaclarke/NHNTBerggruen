@@ -495,7 +495,7 @@ def mp3tonp(f, normalized=False):
 
 def getConfig():
     username = subprocess.check_output(['hostname'], encoding='utf-8').strip()
-    configName = "config/" + username + ".yaml"
+    configName = "/home/se/Documents/NHNTBerggruen/config/" + username + ".yaml"
 
     with open(configName, 'r') as file:
         config = yaml.safe_load(file)
@@ -516,9 +516,9 @@ def main():
     alsaErrorHandling()
 
     # create a log file
-    os.makedirs("logs/", exist_ok = True)
+    os.makedirs("/home/se/Documents/NHNTBerggruen/logs/", exist_ok = True)
     t = datetime.datetime.now()
-    filename = "logs/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
+    filename = "/home/se/Documents/NHNTBerggruen/logs/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
     f = open(filename, "w")
     
     # wait for start command
