@@ -2,6 +2,20 @@
 
 Installation at the Berggruen Institute, Spring 2023 
 
+
+----
+
+## Device Information
+
+| sticker name | ip address | hostname | username | password |
+|--------------|------------|----------|----------|----------| 
+| SE1  |  192.168.1.101	| se1 | se | se |
+| SE2  |  192.168.1.102	| se2 | se | se |
+| SE3  |  192.168.1.103	| se3 | se | se |
+| SE4  |  192.168.1.104	| se4 | se | se |
+| none |  192.168.1.105	| se5 | se | se |
+
+
 ----
 
 ## Instructions
