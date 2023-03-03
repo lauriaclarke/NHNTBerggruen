@@ -14,7 +14,7 @@ pair_name: se5
 exchange_count: 200
 
 # protocol
-protocol: 4
+protocol: 1
 
 # volume
 volume: 30
