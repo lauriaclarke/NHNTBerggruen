@@ -476,7 +476,7 @@ def waitForStart(config):
             if(receiveGGWave(config) == "start"):
                 break
     except KeyboardInterrupt:
-        break
+        pass
 
 def rxtxrxTest(config):
     outputText = receiveGGWave(config)
