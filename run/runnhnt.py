@@ -206,6 +206,7 @@ def main():
 
     # run the stuff
     elif cmd == 'run':
+        print("this doesn't work, stop trying")
         # runParallel(devices)
         # processes = []
 
