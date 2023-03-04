@@ -134,8 +134,6 @@ def ultrasonic(config, stringToSend):
 
     return a
 
-
-
 def speak(config, msgCountIn, inputText):
 
     msgCountOut = msgCountIn + 1
@@ -156,10 +154,15 @@ def speak(config, msgCountIn, inputText):
         toSend.append(inputText)
 
 
+    if config.get('protocol') == 4:
+        channels = 2
+    else:
+        channels = 1
+
     stream = sd.OutputStream(
         dtype='float32', 
         device=config.get('output_device'), 
-        channels=2, 
+        channels=channels, 
         samplerate=48000)
     
     stream.start()
