@@ -174,7 +174,7 @@ def speak(config, msgCountIn, inputText):
         print("transmitting text... " + toSend[i])
         
         if config.get('protocol') == 4:
-            towrite = ultrasonic(stringToSend)
+            towrite = ultrasonic(config, stringToSend)
         else:            
             waveform = ggwave.encode(stringToSend, protocolId = config.get('protocol'), volume = config.get('volume'))
             # write to the pyaudio stream
