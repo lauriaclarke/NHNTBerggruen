@@ -364,9 +364,7 @@ def main():
     # ---------------------------------------- 
 
     # start the conversation
-    exchangeCount = config.get('exchange_count')
-    
-    while totalMsgCount < exchangeCount:
+    while int(totalMsgCount) < config.get('exchange_count'):
 
         localMsgCount = divmod(totalMsgCount, config.get('group_count'))[1]
         print("local: " + str(localMsgCount) + "  total: " + str(totalMsgCount))
