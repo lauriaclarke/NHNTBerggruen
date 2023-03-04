@@ -263,7 +263,7 @@ def main():
     alsaErrorHandling()
 
     # create a log file
-    logName = "/home/" + username + "/Documents/NHNTBerggruen/logs"
+    logName = "/home/se/Documents/NHNTBerggruen/logs"
     os.makedirs(logName, exist_ok = True)
     t = datetime.datetime.now()
     filename = logName + "/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
