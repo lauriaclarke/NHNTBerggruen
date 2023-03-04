@@ -352,7 +352,7 @@ def main():
 
         sendReceive = True
         
-        time.sleep(1)
+        time.sleep(2)
 
         totalMsgCount = speak(config, totalMsgCount, config.get("start_question"))
 
