@@ -257,6 +257,8 @@ def listen(msgCountIn, config):
                     # append the cleaned output text to the message array
                     msgs.append(outputTextClean)
 
+                    startTime = time.time()
+
                 except KeyboardInterrupt:
                     pass
 
