@@ -10,6 +10,9 @@ input_device: 1
 # name of the pair
 pair_name: se3
 
+# number of devices in the conversation group
+group_count: 3
+
 # number of messages this pair will send back and forth
 exchange_count: 200
 
@@ -30,3 +33,7 @@ mode: send
 
 # the contectual information to accompany text prompt send to GPT-3
 pre_prompt: "Answer this question from the perspective of a house plant: "
+
+start_question: "who is a human?"
+
+timeout_response: "what does a multispecies constitution mean for humans?"

@@ -5,13 +5,15 @@ name: se5
 output_device: 0
 
 # index of input
-input_device: 1
+input_device: 0
 
 # name of the pair
 pair_name: se4
 
 # number of devices in the conversation group
 group_count: 2
+
+send_order: 0
 
 # number of messages this pair will send back and forth
 exchange_count: 200
@@ -29,7 +31,7 @@ model: davinci:ft-parsons-school-of-design-2023-03-03-01-43-18
 pitch: 15
 
 # can be send or receive
-mode: receive
+mode: send
 
 # the contectual information to accompany text prompt send to GPT-3
 pre_prompt: "respond to this from the perspective of a house plant: "

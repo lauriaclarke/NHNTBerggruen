@@ -18,7 +18,6 @@ import subprocess
 from gtts import gTTS
 import audio2numpy as a2n
 
-
 TIMEOUT = 20
 MAX_TOKENS=200
 MAX_STRING=140
@@ -40,19 +39,22 @@ def arrayToString(input):
     return output 
 
 def parseMsg(inputText, config):
-    partRegex = re.compile(r'(\d)[:](\d)[:](\d)[/](\d)') 
+    partRegex = re.compile(r'(\d)[:](\d)[:](\d)[/](\d)[:](.*)') 
     regexOut = partRegex.search(inputText)
 
     if regexOut == None:
         print("no message marker")
         return 0, 0, 1, 1, inputText
     else:
+        print(regexOut.groups())
         # extract the message number and and number of parts 
         msgCount = regexOut.group(1)
         recipient = regexOut.group(2)
         msgNumber = regexOut.group(3)
         msgParts = regexOut.group(4)
-        return msgCount, recipient, msgNumber, msgParts, messageText
+        msgText = regexOut.group(5)
+
+        return msgCount, recipient, msgNumber, msgParts, msgText
  
 def py_error_handler(filename, line, function, err, fmt):
     pass
@@ -67,12 +69,12 @@ def alsaErrorHandling():
     asound = cdll.LoadLibrary('libasound.so')
     asound.snd_lib_error_set_handler(c_error_handler)
 
-def speak(config, inputText):
+def speak(config, msgCountIn, inputText):
+
+    msgCountOut = msgCountIn + 1
+
     # split strings that are too long into chunks of length MAX_STRING characters
     # TODO: end on word breaks instead of mid-word
-    
-    # print(inputText)
-    # print(len(inputText))
 
     # get the recipient number from config file
     recipient =  re.sub('\D', '', config.get('pair_name'))
@@ -100,7 +102,7 @@ def speak(config, inputText):
     # send the array of strings
     for i in range(0, len(toSend)):
 
-        header = str(recipient) + ":" + str(i + 1) + "/" + str(len(toSend)) + ": "
+        header = str(msgCountOut) + ":" + str(recipient) + ":" + str(i + 1) + "/" + str(len(toSend)) + ": "
         
         stringToSend = header + toSend[i]
         
@@ -117,6 +119,12 @@ def speak(config, inputText):
     stream.stop()
     stream.close()
 
+    return msgCountOut
+
+
+# takes the config and the current message count
+# if we receive a new message, the message count out is replaced by the message count received
+# if no message is receive before the timeout, this funtion incrments the count an returns 
 def listen(msgCountIn, config):
 
     stream = sd.InputStream(
@@ -160,7 +168,10 @@ def listen(msgCountIn, config):
             # increment the msg count if the timeout happens
             if time.time() - startTime > TIMEOUT:
                 print("exceeded timeout, incrementing count")
+                msgs.append(config.get("timeout_response"))
                 msgCountOut = msgCountIn + 1
+                nameNumber = re.compile(r'(\d)') 
+                recipient = nameNumber.search(config.get("name")).group(0)
                 break
 
             # if decode is successful
@@ -217,9 +228,11 @@ def queryModel(config, currentResponses):
     return responses
 
 def waitForStart(config):
-    print("waiting for start command...")
+    print("waiting for START command...")
     while True:
-        if(listen(config) == "start"):
+        msgCount, recipient, msg = listen(0, config) 
+        if(msg == "start"):
+            print("received START command")
             break
 
 def getConfig():
@@ -231,49 +244,19 @@ def getConfig():
 
     return config
 
-# state machine:
-#   query gpt3
-#   send data over sound
-#   listen
-#   receive data over sound
 
-# if "se" + str(recipient) == config.get("name"):
-#     # strip the part numbers from the message
-#     messageText = re.sub('\d[:]\d[:]\d[/]\d:', '', inputText)
-#     return msgCount, recipient, msgNumber, msgParts, messageText
-# else:
-#     print("message not meant for me")
-#     return 0, 0, 1, 3, inputText
+def main():
+    # ---------------------------------------- 
+    # START
+    devices = sd.query_devices()
+    print(devices)
 
-
-# while msgCount < exchangeCount
-#
-#   if msgCount == sendCount
-#       
-#       sendGGWave()               
-#
-#       sendCount = countList.pop()
-#
-#   else
-#
-#       msgCount, recipient, msg = listen()
-#   
-#       if recipient == me
-#       
-#           responses.append(msg)
-#               
-#
-#
-#
-#
-#
-
-
-
-
-def main(): 
     # read the yaml file
     config = getConfig()
+    
+    localMsgCount = 0
+    totalMsgCount = 0
+    sendCount = config.get("send_order")
 
     # prevent alsa audio errors
     alsaErrorHandling()
@@ -293,29 +276,33 @@ def main():
     # if we're in receive mode first then just start with a blank array
     responses = []
 
-    # a flag to keep track
-    if config.get('mode') == "send":
-        sendReceive = True
-    else:
-        sendReceive = False
-
     # if send mode load a question from the prompt
     if config.get('mode') == "send":
 
+        sendReceive = True
+        
         time.sleep(1)
-        responses = responses + promptArray 
 
-        speak(config, responses[0])
+        totalMsgCount = speak(config, totalMsgCount, config.get("start_question"))
 
         # write to logfile
-        f.write(responses[0] + "\n")
+        f.write(config.get("start_question") + "\n")
 
         sendReceive = False
 
+    else:
+        sendReceive = False
+
+    # ---------------------------------------- 
+
     # start the conversation
-    for i in range(0, config.get('exchange_count')):
+    while totalMsgCount < config.get('exchange_count'):
+
+        localMsgCount = divmod(totalMsgCount, config.get('group_count'))[1]
+        print("local: " + str(localMsgCount) + "  total: " + str(totalMsgCount))
         
-        if sendReceive == True:
+        if localMsgCount == sendCount and sendReceive == True:
+
             # get a response from the API
             responses = queryModel(config, responses)
             
@@ -324,7 +311,7 @@ def main():
 
             print("\nsending...\n")
 
-            speak(config, responses[-1])
+            totalMsgCount = speak(config, totalMsgCount, responses[-1])
 
             # write to logfile
             f.write(responses[-1] + "\n")
@@ -332,11 +319,15 @@ def main():
             sendReceive = False
 
         elif sendReceive == False:
+
             print("\nreceiving...\n")
 
-            outputText = listenTimeout(config)
+            totalMsgCount, recipient, outputText = listen(totalMsgCount, config)
 
-            responses.append(outputText)
+            if "se" + str(recipient) == config.get("name"):
+                responses.append(outputText)
+            else:
+                print("message not meant for me")
 
             # write to logfile
             f.write(outputText + "\n")
