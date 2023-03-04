@@ -269,7 +269,7 @@ def listen(msgCountIn, config):
     stream.close()
 
     # concatenate all the message parts into a single string
-    return msgCountOut, recipient, arrayToString(msgs)
+    return int(msgCountOut), recipient, arrayToString(msgs)
 
 def queryModel(config, currentResponses):
     
