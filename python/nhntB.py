@@ -186,7 +186,7 @@ def speak(config, msgCountIn, inputText):
     stream.stop()
     stream.close()
 
-    return msgCountOut
+    return nt(msgCountOut)
 
 # takes the config and the current message count
 # if we receive a new message, the message count out is replaced by the message count received
