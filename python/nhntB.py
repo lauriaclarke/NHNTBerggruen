@@ -159,7 +159,7 @@ def speak(config, msgCountIn, inputText):
     stream = sd.OutputStream(
         dtype='float32', 
         device=config.get('output_device'), 
-        channels=1, 
+        channels=2, 
         samplerate=48000)
     
     stream.start()
