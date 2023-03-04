@@ -69,6 +69,73 @@ def alsaErrorHandling():
     asound = cdll.LoadLibrary('libasound.so')
     asound.snd_lib_error_set_handler(c_error_handler)
 
+def ultrasonic(config, stringToSend):
+    # generate audio waveform for encoded text
+    ggwaveWaveform = ggwave.encode(stringToSend, protocolId = config.get('protocol'), volume = 50) #config.get('volume'))
+    
+    ggwaveOut = np.frombuffer(ggwaveWaveform, 'float32')
+
+    print("gtts")
+    print(time.perf_counter())
+
+    # GTTS
+    ttsWaveform = gTTS(stringToSend, tld='co.in', slow=True)
+    ttsWaveform.save('hello.mp3')
+    # cmd = "ffmpeg -hide_banner -loglevel error -i hello.mp3 -ar 40000 hello48k.mp3"
+    # os.system(cmd)
+    # ttsOut, sampleRate = a2n.open_audio('hello48k.mp3')
+    ttsOut, sampleRate = a2n.open_audio('hello.mp3')
+    os.system("rm *.mp3")
+
+    # PYTTSX3
+    # engine = pyttsx3.init()
+    # volume = engine.getProperty('volume')
+    # engine.setProperty('volume', 1)
+    # rate = engine.getProperty('rate')
+    # engine.setProperty('rate', 50)
+    # engine.runAndWait()
+    # print(engine.getProperty('rate'))
+    # print(engine.getProperty('volume'))
+    # engine.save_to_file(stringToSend, "hello.mp3")
+    # engine.runAndWait()
+    # sampleRate, ttsOut = mp3tonp("hello.mp3")
+    # # ttsOut, sampleRate = a2n.open_audio('hello.mp3')
+    # print(sampleRate) 
+    # os.system("rm *.mp3")
+
+    ttsOut = ttsOut.astype('float32')
+
+
+    # print("librosa")
+    # print(time.perf_counter())
+    # ttsOut = librosa.effects.pitch_shift(ttsOut, sr=48000, n_steps=config.get('pitch'))
+    # print(time.perf_counter())
+    
+
+    # reformat
+    ttsOut32 = np.frombuffer(ttsOut, 'float32')
+
+    print("array size")
+    print(time.perf_counter())
+    # make sure they're the same length
+    print(len(ttsOut32), len(ggwaveOut))
+    if len(ttsOut32) > len(ggwaveOut):
+        ttsOut32 = ttsOut32[0:len(ggwaveOut)]
+    else:
+        zeroArray = np.zeros(len(ggwaveOut) - len(ttsOut32), dtype=np.float32)
+        ttsOut32 = np.append(ttsOut32, zeroArray)
+    
+    print(time.perf_counter())
+    
+    # format the data into an array appropriately
+    finalOutput = [ttsOut32, ggwaveOut]
+    aa = np.array(finalOutput)
+    a = np.ascontiguousarray(aa.T)
+
+    return a
+
+
+
 def speak(config, msgCountIn, inputText):
 
     msgCountOut = msgCountIn + 1
@@ -89,8 +156,6 @@ def speak(config, msgCountIn, inputText):
         toSend.append(inputText)
 
 
-    # print(toSend) 
-    
     stream = sd.OutputStream(
         dtype='float32', 
         device=config.get('output_device'), 
@@ -105,13 +170,15 @@ def speak(config, msgCountIn, inputText):
         header = str(msgCountOut) + ":" + str(recipient) + ":" + str(i + 1) + "/" + str(len(toSend)) + ": "
         
         stringToSend = header + toSend[i]
-        
-        waveform = ggwave.encode(stringToSend, protocolId = config.get('protocol'), volume = config.get('volume'))
 
         print("transmitting text... " + toSend[i])
-
-        # write to the pyaudio stream
-        towrite = np.frombuffer(waveform, 'float32')
+        
+        if config.get('protocol') == 4:
+            towrite = ultrasonic(stringToSend)
+        else:            
+            waveform = ggwave.encode(stringToSend, protocolId = config.get('protocol'), volume = config.get('volume'))
+            # write to the pyaudio stream
+            towrite = np.frombuffer(waveform, 'float32')
 
         stream.write(towrite)
 
@@ -120,7 +187,6 @@ def speak(config, msgCountIn, inputText):
     stream.close()
 
     return msgCountOut
-
 
 # takes the config and the current message count
 # if we receive a new message, the message count out is replaced by the message count received
