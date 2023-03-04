@@ -75,8 +75,8 @@ def ultrasonic(config, stringToSend):
     
     ggwaveOut = np.frombuffer(ggwaveWaveform, 'float32')
 
-    print("gtts")
-    print(time.perf_counter())
+    # print("gtts")
+    # print(time.perf_counter())
 
     # GTTS
     ttsWaveform = gTTS(stringToSend, tld='co.in', slow=True)
@@ -115,17 +115,17 @@ def ultrasonic(config, stringToSend):
     # reformat
     ttsOut32 = np.frombuffer(ttsOut, 'float32')
 
-    print("array size")
-    print(time.perf_counter())
+    # print("array size")
+    # print(time.perf_counter())
     # make sure they're the same length
-    print(len(ttsOut32), len(ggwaveOut))
+    # print(len(ttsOut32), len(ggwaveOut))
     if len(ttsOut32) > len(ggwaveOut):
         ttsOut32 = ttsOut32[0:len(ggwaveOut)]
     else:
         zeroArray = np.zeros(len(ggwaveOut) - len(ttsOut32), dtype=np.float32)
         ttsOut32 = np.append(ttsOut32, zeroArray)
     
-    print(time.perf_counter())
+    # print(time.perf_counter())
     
     # format the data into an array appropriately
     finalOutput = [ttsOut32, ggwaveOut]
@@ -206,7 +206,7 @@ def listen(msgCountIn, config):
     # start the sound decive input stream    
     stream.start()
 
-    print('listening ... press Ctrl+C to stop')
+    print('listening ...')
 
     # ggwave instace
     instance = ggwave.init()
