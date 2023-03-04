@@ -246,6 +246,7 @@ def listen(msgCountIn, config):
             # if decode is successful
             if (not res is None):
                 try:
+                    startTime = time.time()
                     outputText = res.decode("utf-8")
                     print('received text: ' + res.decode("utf-8"))
 
@@ -257,7 +258,6 @@ def listen(msgCountIn, config):
                     # append the cleaned output text to the message array
                     msgs.append(outputTextClean)
 
-                    startTime = time.time()
 
                 except KeyboardInterrupt:
                     pass
