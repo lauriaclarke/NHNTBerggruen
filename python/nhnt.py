@@ -535,6 +535,7 @@ def main():
     # a flag to keep track
     if config.get('mode') == "send":
         sendReceive = True
+        TIMEOUT = 40
     else:
         sendReceive = False
 

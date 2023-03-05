@@ -27,7 +27,7 @@ MAX_STRING = 130
 apikey = os.getenv('OPENAI_API_KEY')
 openai.api_key = apikey
    
-stop = ["."]
+stop = [""]
 
 promptArray = ["Who is a human?\n"]
 prepromptSend = "Ask a question about the following statement from the perspective of a houseplant: "
@@ -240,8 +240,13 @@ def listen(msgCountIn, config):
             # decode the bytes
             res = ggwave.decode(instance, databytes)
 
+            if config.get('mode') == "send":
+                timeout = 40
+            else: 
+                timeout = 30
+
             # increment the msg count if the timeout happens
-            if time.time() - startTime > TIMEOUT:
+            if time.time() - startTime > timeout:
                 print("exceeded timeout, incrementing count")
                 msgs.append(config.get("timeout_response"))
                 msgCountOut = msgCountIn + 1
