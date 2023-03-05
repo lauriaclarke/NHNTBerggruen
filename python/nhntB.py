@@ -317,8 +317,8 @@ def waitForStart(config):
 def getConfig():
     hostname = subprocess.check_output(['hostname'], encoding='utf-8').strip()
     username = subprocess.check_output(['whoami'], encoding='utf-8').strip()
-    configName = "/home/" + username + "/Documents/NHNTBerggruen/config/" + hostname + ".yaml"
-    # configName = "/home/" + username + "/Documents/mfadt/research/NHNTBerggruen/config/" + hostname + ".yaml"
+    # configName = "/home/" + username + "/Documents/NHNTBerggruen/config/" + hostname + ".yaml"
+    configName = "/home/" + username + "/Documents/mfadt/research/NHNTBerggruen/config/" + hostname + ".yaml"
 
     with open(configName, 'r') as file:
         config = yaml.safe_load(file)
@@ -343,8 +343,8 @@ def main():
     alsaErrorHandling()
 
     # create a log file
-    logName = "/home/se/Documents/NHNTBerggruen/logs"
-    # logName = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs"
+    # logName = "/home/se/Documents/NHNTBerggruen/logs"
+    logName = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs"
     os.makedirs(logName, exist_ok = True)
     t = datetime.datetime.now()
     filename = logName + "/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
