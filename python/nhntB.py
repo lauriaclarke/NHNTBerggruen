@@ -27,7 +27,7 @@ MAX_STRING = 130
 apikey = os.getenv('OPENAI_API_KEY')
 openai.api_key = apikey
    
-stop = [""]
+stop = ["."]
 
 promptArray = ["Who is a human?\n"]
 prepromptSend = "Ask a question about the following statement from the perspective of a houseplant: "
