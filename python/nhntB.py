@@ -15,12 +15,13 @@ import pydub
 import librosa
 import yaml
 import subprocess
+from textwrap import TextWrapper
 from gtts import gTTS
 import audio2numpy as a2n
 
-TIMEOUT = 20
-MAX_TOKENS=200
-MAX_STRING=140
+TIMEOUT = 30
+MAX_TOKENS = 200
+MAX_STRING = 130
 
 # get the api key from your environment variables
 apikey = os.getenv('OPENAI_API_KEY')
@@ -38,13 +39,13 @@ def arrayToString(input):
         output = output + x
     return output 
 
-def parseMsg(inputText, config):
+def parseMsg(msgCountIn, inputText, config):
     partRegex = re.compile(r'(\d)[:](\d)[:](\d)[/](\d)[:](.*)') 
     regexOut = partRegex.search(inputText)
 
     if regexOut == None:
         print("no message marker")
-        return 0, 0, 1, 1, inputText
+        return msgCountIn, 0, 1, 1, inputText
     else:
         print(regexOut.groups())
         # extract the message number and and number of parts 
@@ -144,14 +145,19 @@ def speak(config, msgCountIn, inputText):
     # get the recipient number from config file
     recipient =  re.sub('\D', '', config.get('pair_name'))
 
-    toSend = []
-    if len(inputText) > MAX_STRING:
-        i = 0
-        while i < len(inputText):
-            i += MAX_STRING
-            toSend.append(inputText[i - MAX_STRING:i])
-    else:
-        toSend.append(inputText)
+    # toSend = []
+    # if len(inputText) > MAX_STRING:
+    #     i = 0
+    #     while i < len(inputText):
+    #         i += MAX_STRING
+    #         toSend.append(inputText[i - MAX_STRING:i])
+    # else:
+    #     toSend.append(inputText)
+
+    
+    w = TextWrapper(MAX_STRING, break_long_words=True)
+    toSend = w.wrap(inputText)
+    print(toSend)
 
 
     if config.get('protocol') == 4:
@@ -241,6 +247,8 @@ def listen(msgCountIn, config):
                 msgCountOut = msgCountIn + 1
                 nameNumber = re.compile(r'(\d)') 
                 recipient = nameNumber.search(config.get("name")).group(0)
+                print(msgCountOut)
+                time.sleep(2)
                 break
 
             # if decode is successful
@@ -251,7 +259,7 @@ def listen(msgCountIn, config):
                     print('received text: ' + res.decode("utf-8"))
 
                     # get the message number / parts and contents
-                    msgCountOut, recipient, msgNumber, msgParts, outputTextClean = parseMsg(outputText, config)
+                    msgCountOut, recipient, msgNumber, msgParts, outputTextClean = parseMsg(msgCountIn, outputText, config)
 
                     print(msgCountOut, recipient, msgNumber, msgParts, outputTextClean)
 
@@ -309,7 +317,8 @@ def waitForStart(config):
 def getConfig():
     hostname = subprocess.check_output(['hostname'], encoding='utf-8').strip()
     username = subprocess.check_output(['whoami'], encoding='utf-8').strip()
-    configName = "/home/" + username + "/Documents/NHNTBerggruen/config/" + hostname + ".yaml"
+    # configName = "/home/" + username + "/Documents/NHNTBerggruen/config/" + hostname + ".yaml"
+    configName = "/home/" + username + "/Documents/mfadt/research/NHNTBerggruen/config/" + hostname + ".yaml"
 
     with open(configName, 'r') as file:
         config = yaml.safe_load(file)
@@ -334,7 +343,8 @@ def main():
     alsaErrorHandling()
 
     # create a log file
-    logName = "/home/se/Documents/NHNTBerggruen/logs"
+    # logName = "/home/se/Documents/NHNTBerggruen/logs"
+    logName = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs"
     os.makedirs(logName, exist_ok = True)
     t = datetime.datetime.now()
     filename = logName + "/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
@@ -399,13 +409,14 @@ def main():
 
             if "se" + str(recipient) == config.get("name"):
                 responses.append(outputText)
+                sendReceive = True
+                # write to logfile
+                f.write(outputText + "\n")
+
             else:
                 print("message not meant for me")
 
-            # write to logfile
-            f.write(outputText + "\n")
             
-            sendReceive = True
 
     f.close()
 
