@@ -384,22 +384,26 @@ def main():
         localMsgCount = divmod(totalMsgCount, config.get('group_count'))[1]
         print("local: " + str(localMsgCount) + "  total: " + str(totalMsgCount))
         
-        if localMsgCount == sendCount and sendReceive == True:
+        if  sendReceive == True:
+            if localMsgCount == sendCount:
+                # get a response from the API
+                responses = queryModel(config, responses)
 
-            # get a response from the API
-            responses = queryModel(config, responses)
-            
-            # give some time to improve cadence
-            time.sleep(1)
+                # give some time to improve cadence
+                time.sleep(1)
 
-            print("\nsending...\n")
+                print("\nsending...\n")
 
-            totalMsgCount = speak(config, totalMsgCount, responses[-1])
+                totalMsgCount = speak(config, totalMsgCount, responses[-1])
 
-            # write to logfile
-            f.write(responses[-1] + "\n")
+                # write to logfile
+                f.write(responses[-1] + "\n")
 
-            sendReceive = False
+                sendReceive = False
+            else:
+                print("wrong message counts: ")
+                print("local: " + str(localMsgCount) + "  total: " + str(totalMsgCount))
+                exit()
 
         elif sendReceive == False:
 

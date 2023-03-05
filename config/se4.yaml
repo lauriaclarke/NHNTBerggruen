@@ -11,9 +11,9 @@ input_device: 1
 pair_name: se5
 
 # number of devices in the conversation group
-group_count: 3
+group_count: 2
 
-send_order: 1
+send_order: 0
 
 # number of messages this pair will send back and forth
 exchange_count: 200
@@ -32,7 +32,7 @@ model: text-davinci-003
 pitch: 15
 
 # can be send or receive
-mode: receive
+mode: send
 
 # the contectual information to accompany text prompt send to GPT-3
 pre_prompt: "ask a question about this statement from the perspective of a house plant: "

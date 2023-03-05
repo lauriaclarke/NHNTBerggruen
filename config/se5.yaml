@@ -11,9 +11,9 @@ input_device: 1
 pair_name: se3
 
 # number of devices in the conversation group
-group_count: 3
+group_count: 2
 
-send_order: 2
+send_order: 1
 
 # number of messages this pair will send back and forth
 exchange_count: 200
