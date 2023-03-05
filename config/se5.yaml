@@ -8,7 +8,7 @@ output_device: 0
 input_device: 1
 
 # name of the pair
-pair_name: se3
+pair_name: se4
 
 # number of devices in the conversation group
 group_count: 2
