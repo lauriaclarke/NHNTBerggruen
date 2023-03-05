@@ -310,8 +310,6 @@ def receiveGGWave(config):
     return arrayToString(msgs)
 
 def receiveGGWaveTimeout(config):
-    timeout = 40
-
     stream = sd.InputStream(
         dtype='float32', 
         device=config.get('input_device'), 
@@ -337,6 +335,11 @@ def receiveGGWaveTimeout(config):
     # keep the start time for timeout
     startTime = time.time()
 
+    if config.get('mode') == "send":
+        timeout = 40
+    else: 
+        timeout = 20
+
     try:
         # until we've received all parts, call this function
         while msgNumber < msgParts:
@@ -352,11 +355,14 @@ def receiveGGWaveTimeout(config):
 
             if time.time() - startTime > timeout:
                 print("exceeded timeout")
+                msgs.append(config.get("timeout_response"))
                 break
 
             # if decode is successful
             if (not res is None):
                 try:
+                    startTime = time.time()
+
                     outputText = res.decode("utf-8")
                     print('received text: ' + res.decode("utf-8"))
 
@@ -535,6 +541,7 @@ def main():
     # a flag to keep track
     if config.get('mode') == "send":
         sendReceive = True
+        TIMEOUT = 40
     else:
         sendReceive = False
 

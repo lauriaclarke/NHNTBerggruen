@@ -15,13 +15,13 @@ import pydub
 import librosa
 import yaml
 import subprocess
+from textwrap import TextWrapper
 from gtts import gTTS
 import audio2numpy as a2n
 
-
-TIMEOUT = 20
-MAX_TOKENS=200
-MAX_STRING=140
+TIMEOUT = 30
+MAX_TOKENS = 200
+MAX_STRING = 130
 
 # get the api key from your environment variables
 apikey = os.getenv('OPENAI_API_KEY')
@@ -39,20 +39,23 @@ def arrayToString(input):
         output = output + x
     return output 
 
-def parseMsg(inputText, config):
-    partRegex = re.compile(r'(\d)[:](\d)[:](\d)[/](\d)') 
+def parseMsg(msgCountIn, inputText, config):
+    partRegex = re.compile(r'(\d)[:](\d)[:](\d)[/](\d)[:](.*)') 
     regexOut = partRegex.search(inputText)
 
     if regexOut == None:
         print("no message marker")
-        return 0, 0, 1, 1, inputText
+        return msgCountIn, 0, 1, 1, inputText
     else:
+        print(regexOut.groups())
         # extract the message number and and number of parts 
         msgCount = regexOut.group(1)
         recipient = regexOut.group(2)
         msgNumber = regexOut.group(3)
         msgParts = regexOut.group(4)
-        return msgCount, recipient, msgNumber, msgParts, messageText
+        msgText = regexOut.group(5)
+
+        return msgCount, recipient, msgNumber, msgParts, msgText
  
 def py_error_handler(filename, line, function, err, fmt):
     pass
@@ -67,32 +70,105 @@ def alsaErrorHandling():
     asound = cdll.LoadLibrary('libasound.so')
     asound.snd_lib_error_set_handler(c_error_handler)
 
-def speak(config, inputText):
+def ultrasonic(config, stringToSend):
+    # generate audio waveform for encoded text
+    ggwaveWaveform = ggwave.encode(stringToSend, protocolId = config.get('protocol'), volume = 50) #config.get('volume'))
+    
+    ggwaveOut = np.frombuffer(ggwaveWaveform, 'float32')
+
+    # print("gtts")
+    # print(time.perf_counter())
+
+    # GTTS
+    ttsWaveform = gTTS(stringToSend, tld='co.in', slow=True)
+    ttsWaveform.save('hello.mp3')
+    # cmd = "ffmpeg -hide_banner -loglevel error -i hello.mp3 -ar 40000 hello48k.mp3"
+    # os.system(cmd)
+    # ttsOut, sampleRate = a2n.open_audio('hello48k.mp3')
+    ttsOut, sampleRate = a2n.open_audio('hello.mp3')
+    os.system("rm *.mp3")
+
+    # PYTTSX3
+    # engine = pyttsx3.init()
+    # volume = engine.getProperty('volume')
+    # engine.setProperty('volume', 1)
+    # rate = engine.getProperty('rate')
+    # engine.setProperty('rate', 50)
+    # engine.runAndWait()
+    # print(engine.getProperty('rate'))
+    # print(engine.getProperty('volume'))
+    # engine.save_to_file(stringToSend, "hello.mp3")
+    # engine.runAndWait()
+    # sampleRate, ttsOut = mp3tonp("hello.mp3")
+    # # ttsOut, sampleRate = a2n.open_audio('hello.mp3')
+    # print(sampleRate) 
+    # os.system("rm *.mp3")
+
+    ttsOut = ttsOut.astype('float32')
+
+
+    # print("librosa")
+    # print(time.perf_counter())
+    # ttsOut = librosa.effects.pitch_shift(ttsOut, sr=48000, n_steps=config.get('pitch'))
+    # print(time.perf_counter())
+    
+
+    # reformat
+    ttsOut32 = np.frombuffer(ttsOut, 'float32')
+
+    # print("array size")
+    # print(time.perf_counter())
+    # make sure they're the same length
+    # print(len(ttsOut32), len(ggwaveOut))
+    if len(ttsOut32) > len(ggwaveOut):
+        ttsOut32 = ttsOut32[0:len(ggwaveOut)]
+    else:
+        zeroArray = np.zeros(len(ggwaveOut) - len(ttsOut32), dtype=np.float32)
+        ttsOut32 = np.append(ttsOut32, zeroArray)
+    
+    # print(time.perf_counter())
+    
+    # format the data into an array appropriately
+    finalOutput = [ttsOut32, ggwaveOut]
+    aa = np.array(finalOutput)
+    a = np.ascontiguousarray(aa.T)
+
+    return a
+
+def speak(config, msgCountIn, inputText):
+
+    msgCountOut = msgCountIn + 1
+
     # split strings that are too long into chunks of length MAX_STRING characters
     # TODO: end on word breaks instead of mid-word
-    
-    # print(inputText)
-    # print(len(inputText))
 
     # get the recipient number from config file
     recipient =  re.sub('\D', '', config.get('pair_name'))
 
-    toSend = []
-    if len(inputText) > MAX_STRING:
-        i = 0
-        while i < len(inputText):
-            i += MAX_STRING
-            toSend.append(inputText[i - MAX_STRING:i])
-    else:
-        toSend.append(inputText)
+    # toSend = []
+    # if len(inputText) > MAX_STRING:
+    #     i = 0
+    #     while i < len(inputText):
+    #         i += MAX_STRING
+    #         toSend.append(inputText[i - MAX_STRING:i])
+    # else:
+    #     toSend.append(inputText)
 
-
-    # print(toSend) 
     
+    w = TextWrapper(MAX_STRING, break_long_words=True)
+    toSend = w.wrap(inputText)
+    print(toSend)
+
+
+    if config.get('protocol') == 4:
+        channels = 2
+    else:
+        channels = 1
+
     stream = sd.OutputStream(
         dtype='float32', 
         device=config.get('output_device'), 
-        channels=1, 
+        channels=channels, 
         samplerate=48000)
     
     stream.start()
@@ -100,16 +176,18 @@ def speak(config, inputText):
     # send the array of strings
     for i in range(0, len(toSend)):
 
-        header = str(recipient) + ":" + str(i + 1) + "/" + str(len(toSend)) + ": "
+        header = str(msgCountOut) + ":" + str(recipient) + ":" + str(i + 1) + "/" + str(len(toSend)) + ": "
         
         stringToSend = header + toSend[i]
-        
-        waveform = ggwave.encode(stringToSend, protocolId = config.get('protocol'), volume = config.get('volume'))
 
         print("transmitting text... " + toSend[i])
-
-        # write to the pyaudio stream
-        towrite = np.frombuffer(waveform, 'float32')
+        
+        if config.get('protocol') == 4:
+            towrite = ultrasonic(config, stringToSend)
+        else:            
+            waveform = ggwave.encode(stringToSend, protocolId = config.get('protocol'), volume = config.get('volume'))
+            # write to the pyaudio stream
+            towrite = np.frombuffer(waveform, 'float32')
 
         stream.write(towrite)
 
@@ -117,6 +195,11 @@ def speak(config, inputText):
     stream.stop()
     stream.close()
 
+    return int(msgCountOut)
+
+# takes the config and the current message count
+# if we receive a new message, the message count out is replaced by the message count received
+# if no message is receive before the timeout, this funtion incrments the count an returns 
 def listen(msgCountIn, config):
 
     stream = sd.InputStream(
@@ -129,7 +212,7 @@ def listen(msgCountIn, config):
     # start the sound decive input stream    
     stream.start()
 
-    print('listening ... press Ctrl+C to stop')
+    print('listening ...')
 
     # ggwave instace
     instance = ggwave.init()
@@ -157,25 +240,37 @@ def listen(msgCountIn, config):
             # decode the bytes
             res = ggwave.decode(instance, databytes)
 
+            if config.get('mode') == "send":
+                timeout = 40
+            else: 
+                timeout = 20
+
             # increment the msg count if the timeout happens
-            if time.time() - startTime > TIMEOUT:
+            if time.time() - startTime > timeout:
                 print("exceeded timeout, incrementing count")
+                msgs.append(config.get("timeout_response"))
                 msgCountOut = msgCountIn + 1
+                nameNumber = re.compile(r'(\d)') 
+                recipient = nameNumber.search(config.get("name")).group(0)
+                print(msgCountOut)
+                time.sleep(2)
                 break
 
             # if decode is successful
             if (not res is None):
                 try:
+                    startTime = time.time()
                     outputText = res.decode("utf-8")
                     print('received text: ' + res.decode("utf-8"))
 
                     # get the message number / parts and contents
-                    msgCountOut, recipient, msgNumber, msgParts, outputTextClean = parseMsg(outputText, config)
+                    msgCountOut, recipient, msgNumber, msgParts, outputTextClean = parseMsg(msgCountIn, outputText, config)
 
                     print(msgCountOut, recipient, msgNumber, msgParts, outputTextClean)
 
                     # append the cleaned output text to the message array
                     msgs.append(outputTextClean)
+
 
                 except KeyboardInterrupt:
                     pass
@@ -189,7 +284,7 @@ def listen(msgCountIn, config):
     stream.close()
 
     # concatenate all the message parts into a single string
-    return msgCountOut, recipient, arrayToString(msgs)
+    return int(msgCountOut), recipient, arrayToString(msgs)
 
 def queryModel(config, currentResponses):
     
@@ -217,71 +312,47 @@ def queryModel(config, currentResponses):
     return responses
 
 def waitForStart(config):
-    print("waiting for start command...")
+    print("waiting for START command...")
     while True:
-        if(listen(config) == "start"):
+        msgCount, recipient, msg = listen(0, config) 
+        if(msg == "start"):
+            print("received START command")
             break
 
 def getConfig():
+    hostname = subprocess.check_output(['hostname'], encoding='utf-8').strip()
     username = subprocess.check_output(['whoami'], encoding='utf-8').strip()
-    configName = "config/" + username + ".yaml"
+    configName = "/home/" + username + "/Documents/NHNTBerggruen/config/" + hostname + ".yaml"
+    # configName = "/home/" + username + "/Documents/mfadt/research/NHNTBerggruen/config/" + hostname + ".yaml"
 
     with open(configName, 'r') as file:
         config = yaml.safe_load(file)
 
     return config
 
-# state machine:
-#   query gpt3
-#   send data over sound
-#   listen
-#   receive data over sound
 
-# if "se" + str(recipient) == config.get("name"):
-#     # strip the part numbers from the message
-#     messageText = re.sub('\d[:]\d[:]\d[/]\d:', '', inputText)
-#     return msgCount, recipient, msgNumber, msgParts, messageText
-# else:
-#     print("message not meant for me")
-#     return 0, 0, 1, 3, inputText
+def main():
+    # ---------------------------------------- 
+    # START
+    devices = sd.query_devices()
+    print(devices)
 
-
-# while msgCount < exchangeCount
-#
-#   if msgCount == sendCount
-#       
-#       sendGGWave()               
-#
-#       sendCount = countList.pop()
-#
-#   else
-#
-#       msgCount, recipient, msg = listen()
-#   
-#       if recipient == me
-#       
-#           responses.append(msg)
-#               
-#
-#
-#
-#
-#
-
-
-
-
-def main(): 
     # read the yaml file
     config = getConfig()
+    
+    localMsgCount = 0
+    totalMsgCount = 0
+    sendCount = config.get("send_order")
 
     # prevent alsa audio errors
     alsaErrorHandling()
 
     # create a log file
-    os.makedirs("logs/", exist_ok = True)
+    logName = "/home/se/Documents/NHNTBerggruen/logs"
+    # logName = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs"
+    os.makedirs(logName, exist_ok = True)
     t = datetime.datetime.now()
-    filename = "logs/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
+    filename = logName + "/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
     f = open(filename, "w")
     
     # wait for start command
@@ -293,55 +364,68 @@ def main():
     # if we're in receive mode first then just start with a blank array
     responses = []
 
-    # a flag to keep track
-    if config.get('mode') == "send":
-        sendReceive = True
-    else:
-        sendReceive = False
-
     # if send mode load a question from the prompt
     if config.get('mode') == "send":
 
-        time.sleep(1)
-        responses = responses + promptArray 
+        sendReceive = True
+        
+        time.sleep(2)
 
-        speak(config, responses[0])
+        totalMsgCount = speak(config, totalMsgCount, config.get("start_question"))
 
         # write to logfile
-        f.write(responses[0] + "\n")
+        f.write(config.get("start_question") + "\n")
 
         sendReceive = False
 
+    else:
+        sendReceive = False
+
+    # ---------------------------------------- 
+
     # start the conversation
-    for i in range(0, config.get('exchange_count')):
+    while int(totalMsgCount) < config.get('exchange_count'):
+
+        localMsgCount = divmod(totalMsgCount, config.get('group_count'))[1]
+        print("local: " + str(localMsgCount) + "  total: " + str(totalMsgCount))
         
-        if sendReceive == True:
-            # get a response from the API
-            responses = queryModel(config, responses)
-            
-            # give some time to improve cadence
-            time.sleep(1)
+        if  sendReceive == True:
+            if localMsgCount == sendCount:
+                # get a response from the API
+                responses = queryModel(config, responses)
 
-            print("\nsending...\n")
+                # give some time to improve cadence
+                time.sleep(1)
 
-            speak(config, responses[-1])
+                print("\nsending...\n")
 
-            # write to logfile
-            f.write(responses[-1] + "\n")
+                totalMsgCount = speak(config, totalMsgCount, responses[-1])
 
-            sendReceive = False
+                # write to logfile
+                f.write(responses[-1] + "\n")
+
+                sendReceive = False
+            else:
+                print("wrong message counts: ")
+                print("local: " + str(localMsgCount) + "  total: " + str(totalMsgCount))
+                exit()
 
         elif sendReceive == False:
+
             print("\nreceiving...\n")
 
-            outputText = listenTimeout(config)
+            totalMsgCount, recipient, outputText = listen(totalMsgCount, config)
 
-            responses.append(outputText)
+            if "se" + str(recipient) == config.get("name"):
+                responses.append(outputText)
+                sendReceive = True
+                # write to logfile
+                f.write(outputText + "\n")
 
-            # write to logfile
-            f.write(outputText + "\n")
+            else:
+                print("message not meant for me")
+
             
-            sendReceive = True
 
     f.close()
 
