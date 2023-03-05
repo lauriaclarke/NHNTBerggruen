@@ -243,7 +243,7 @@ def listen(msgCountIn, config):
             if config.get('mode') == "send":
                 timeout = 40
             else: 
-                timeout = 30
+                timeout = 20
 
             # increment the msg count if the timeout happens
             if time.time() - startTime > timeout:
