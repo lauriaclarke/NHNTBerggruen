@@ -355,11 +355,14 @@ def receiveGGWaveTimeout(config):
 
             if time.time() - startTime > timeout:
                 print("exceeded timeout")
+                msgs.append(config.get("timeout_response"))
                 break
 
             # if decode is successful
             if (not res is None):
                 try:
+                    startTime = time.time()
+
                     outputText = res.decode("utf-8")
                     print('received text: ' + res.decode("utf-8"))
 
