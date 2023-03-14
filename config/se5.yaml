@@ -31,7 +31,7 @@ model: davinci:ft-parsons-school-of-design-2023-03-13-10-39-27
 pitch: 15
 
 # can be send or receive
-mode: receive
+mode: send
 
 # question this plant will ask at the beginning
 start_question: "who is a human?"
