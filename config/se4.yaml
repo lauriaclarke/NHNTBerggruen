@@ -22,7 +22,7 @@ exchange_count: 200
 protocol: 1
 
 # volume
-volume: 60
+volume: 90
 
 # GPT-3 model used
 # model: davinci:ft-parsons-school-of-design-2023-03-03-01-43-18
