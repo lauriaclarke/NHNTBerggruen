@@ -16,16 +16,20 @@ group_count: 2
 send_order: 0
 
 # number of messages this pair will send back and forth
-exchange_count: 200
+exchange_count: 100
 
 # protocol
-protocol: 1
+protocol: 4
 
 # volume
 volume: 30
 
 # GPT-3 model used
-model: davinci:ft-parsons-school-of-design-2023-03-03-01-43-18
+modelA: davinci:ft-parsons-school-of-design-2023-03-03-01-43-18
+# modelB: davinci:ft-parsons-school-of-design-2023-03-03-01-43-18
+modelB: text-davinci-003
+
+model: text-davinci-003
 
 # negative values lower pitch, positive values increase it
 pitch: 15
@@ -33,9 +37,8 @@ pitch: 15
 # can be send or receive
 mode: send
 
-# the contectual information to accompany text prompt send to GPT-3
-pre_prompt: "respond to this from the perspective of a house plant: "
-
+# the question to start with if we're in send mode
 start_question: "who is a human?"
 
+# question to ask in the case of a timeout
 timeout_response: "what does a multispecies constitution mean for humans?"
