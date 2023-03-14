@@ -8,17 +8,17 @@ output_device: 0
 input_device: 1
 
 # name of the pair
-pair_name: se5
+pair_name: se3
 
 # number of messages this pair will send back and forth
 exchange_count: 200
 
 # protocol
 # 0 - slow audible
-# 1 - fast 
+# 1 - fast
 # 2 - fastest
 # 4 - fast ultrasonic
-protocol: 1
+protocol: 4
 
 # volume
 volume: 90

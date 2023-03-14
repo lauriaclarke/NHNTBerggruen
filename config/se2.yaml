@@ -1,4 +1,4 @@
-# name of device 
+# name of device
 name: se2
 
 # index of output
@@ -8,20 +8,20 @@ output_device: 0
 input_device: 1
 
 # name of the pair
-pair_name: se3
+pair_name: se5
 
 # number of messages this pair will send back and forth
 exchange_count: 200
 
 # protocol
 # 0 - slow audible
-# 1 - fast 
+# 1 - fast
 # 2 - fastest
 # 4 - fast ultrasonic
 protocol: 1
 
 # volume
-volume: 30
+volume: 90
 
 # GPT-3 model used
 # model: text-davinci-003

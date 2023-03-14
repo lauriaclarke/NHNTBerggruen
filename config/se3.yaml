@@ -1,4 +1,4 @@
-# name of device 
+# name of device
 name: se3
 
 # index of output
@@ -15,13 +15,13 @@ exchange_count: 200
 
 # protocol
 # 0 - slow audible
-# 1 - fast 
+# 1 - fast
 # 2 - fastest
 # 4 - fast ultrasonic
 protocol: 4
 
 # volume
-volume: 30
+volume: 90
 
 # GPT-3 model used
 # model: text-davinci-003
