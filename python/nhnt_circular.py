@@ -24,18 +24,12 @@ import random
 TIMEOUT=20
 MAX_TOKENS=200
 MAX_STRING=140
-PERSPECTIVE_SWITCH=3
 
 # get the api key from your environment variables
 apikey = os.getenv('OPENAI_API_KEY')
 openai.api_key = apikey
-
-# generic models
-modelReceive = "text-davinci-003"
-modelSend = "text-davinci-003"
    
 stop = ["."]
-
 
 firstStringSend = "ask a question about this statement"
 firstStringReceive= "respond to this question"
@@ -45,6 +39,13 @@ perspectiveStringB = ["discussing planetary computation", "who hates humans", "w
 perspectiveA = cycle(perspectiveStringA)
 perspectiveB = cycle(perspectiveStringB)
 
+# preprompt = firstStringSend + middleString + perspectiveString
+
+# responses = ["Who is a human?\n"]
+responses = ["What is the benefit of a multispecies constitution?\n"]
+
+prepromptSend = "Ask a question about the following statement from the perspective of a houseplant: "
+prepromptReceive = "Answer this question from the perspective of a houseplant who hates humans: "
 
 def arrayToString(input):
     output = ""
@@ -179,8 +180,8 @@ def sendGGWaveUT(config, inputText):
     
         ggwaveOut = np.frombuffer(ggwaveWaveform, 'float32')
 
-        # print("gtts")
-        # print(time.perf_counter())
+        print("gtts")
+        print(time.perf_counter())
 
         # GTTS
         ttsWaveform = gTTS(stringToSend, tld='co.in', slow=True)
@@ -219,23 +220,23 @@ def sendGGWaveUT(config, inputText):
         # reformat
         ttsOut32 = np.frombuffer(ttsOut, 'float32')
 
-        # print("array size")
-        # print(time.perf_counter())
+        print("array size")
+        print(time.perf_counter())
         # make sure they're the same length
-        # print(len(ttsOut32), len(ggwaveOut))
+        print(len(ttsOut32), len(ggwaveOut))
         if len(ttsOut32) > len(ggwaveOut):
             ttsOut32 = ttsOut32[0:len(ggwaveOut)]
         else:
             zeroArray = np.zeros(len(ggwaveOut) - len(ttsOut32), dtype=np.float32)
             ttsOut32 = np.append(ttsOut32, zeroArray)
         
-        # print(time.perf_counter())
+        print(time.perf_counter())
         
         # format the data into an array appropriately
         finalOutput = [ttsOut32, ggwaveOut]
         aa = np.array(finalOutput)
         a = np.ascontiguousarray(aa.T)
-        # print(a.shape)
+        print(a.shape)
         print("transmitting text... " + toSend[i])
 
         # write to the pyaudio stream
@@ -441,17 +442,21 @@ def converseLoop(n_exchange, starterPrompt):
 
     return responses
 
-def converseSingle(config, persp, currentResponses):
-
+def converseSingle(config, currentResponses):
+    
     responses = []
 
     responses = responses + currentResponses
-    
-    if config.get('mode') == "send":
-        preprompt = firstStringSend + " " + middleString + " " + persp + ": "
-    else:
-        preprompt = firstStringReceive + " " + middleString + " " + persp + ": "
 
+    # false means we're in receive mode and the plant is asking questions
+    # if config.get('mode') == "send":
+    #     preprompt = prepromptSend
+    #     model = modelSend
+    # else:
+    #     preprompt = prepromptReceive
+    #     model = modelReceive
+
+    preprompt = config.get('pre_prompt')
     model = config.get('model')
 
     prompt = preprompt + responses[-1] + "\n"
@@ -498,8 +503,7 @@ def mp3tonp(f, normalized=False):
 
 def getConfig():
     username = subprocess.check_output(['hostname'], encoding='utf-8').strip()
-    configName = "/home/se/Documents/NHNTBerggruen/config/" + username + ".yaml"
-    # configName = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/config/" + username + ".yaml"
+    configName = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/config/" + username + ".yaml"
 
     with open(configName, 'r') as file:
         config = yaml.safe_load(file)
@@ -520,84 +524,42 @@ def main():
     alsaErrorHandling()
 
     # create a log file
-    os.makedirs("/home/se/Documents/NHNTBerggruen/logs/", exist_ok = True)
+    os.makedirs("/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs/", exist_ok = True)
     t = datetime.datetime.now()
-    filename = "/home/se/Documents/NHNTBerggruen/logs/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
+    filename = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
     f = open(filename, "w")
-    # os.makedirs("/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs/", exist_ok = True)
-    # t = datetime.datetime.now()
-    # filename = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
-    # f = open(filename, "w")
-    
-    # wait for start command
-    waitForStart(config)
 
-    # wait three second before starting
-    time.sleep(3)
-
-    # if we're in receive mode first then just start with a blank array
     responses = [config.get("start_question")]
+    
+    for i in range(0, config.get("exchange_count")):
+        
+        if i % 4 == 0:
+            persp = next(perspectiveA) + " " + random.choice(perspectiveStringB)
 
-    # a flag to keep track
-    if config.get('mode') == "send":
-        sendReceive = True
-        TIMEOUT = 40
-    else:
-        sendReceive = False
-
-    # if send mode load a question from the prompt
-    if config.get('mode') == "send":
-
-        time.sleep(1)
-
-        if config.get('protocol') == 4:
-            sendGGWaveUT(config, responses[0])
+        if i % 2 == 0:
+            model = config.get('modelA')
+            preprompt = firstStringReceive + " " + middleString + " " + persp + ": "
         else:
-            sendGGWave(config, responses[0])
+            model = config.get('modelB')
+            preprompt = firstStringSend + " " + middleString + " " + persp + ": "
 
-        # write to logfile
-        f.write(responses[0] + "\n")
+        prompt = preprompt + responses[-1]
 
-        sendReceive = False
+        print("prompt:: " + prompt)
+        f.write("prompt:: " + prompt)
 
-    # start the conversation
-    for i in range(0, config.get('exchange_count')):
+        # get the completion from model
+        completion = openai.Completion.create(engine=model, prompt=prompt, max_tokens=MAX_TOKENS, stop=stop)
 
-        if i % PERSPECTIVE_SWITCH == 0:
-            persp = next(perspectiveA) + " " + random.choice(perspectiveStringB) 
+        responseString = completion.choices[0].text.strip()
+ 
+        fullResponse = responseString + "\n"
+        
+        print("response:: " + fullResponse)
+        f.write("response:: " + fullResponse + "\n")
 
-        if sendReceive == True:
-
-            # get a response from the API
-            responses = converseSingle(config, persp, responses)
-            
-            # give some time to improce cadence
-            time.sleep(1)
-
-            print("\nsending...\n")
-
-            # send the most recent response
-            if config.get('protocol') == 4:
-                sendGGWaveUT(config, responses[-1])
-            else:
-                sendGGWave(config, responses[-1])
-
-            # write to logfile
-            f.write(responses[-1] + "\n")
-
-            sendReceive = False
-
-        elif sendReceive == False:
-            print("\nreceiving...\n")
-
-            outputText = receiveGGWaveTimeout(config)
-
-            responses.append(outputText)
-
-            # write to logfile
-            f.write(outputText + "\n")
-            
-            sendReceive = True
+        # add the formatted string to the list
+        responses.append(fullResponse)
 
     f.close()
 

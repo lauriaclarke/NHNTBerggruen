@@ -10,23 +10,22 @@ input_device: 1
 # name of the pair
 pair_name: se4
 
-# number of devices in the conversation group
-group_count: 2
-
-send_order: 1
-
 # number of messages this pair will send back and forth
 exchange_count: 200
 
 # protocol
+# 0 - slow audible
+# 1 - fast 
+# 2 - fastest
+# 4 - fast ultrasonic
 protocol: 1
 
 # volume
 volume: 90
 
 # GPT-3 model used
-# model: davinci:ft-parsons-school-of-design-2023-03-03-01-43-18
-model: text-davinci-003
+# model: text-davinci-003
+model: davinci:ft-parsons-school-of-design-2023-03-13-10-39-27
 
 # negative values lower pitch, positive values increase it
 pitch: 15
@@ -34,9 +33,8 @@ pitch: 15
 # can be send or receive
 mode: receive
 
-# the contectual information to accompany text prompt send to GPT-3
-pre_prompt: "respond to this from the perspective of a house plant: "
-
+# question this plant will ask at the beginning
 start_question: "who is a human?"
 
+# question to respond to if there's a timeout
 timeout_response: "what does a multispecies constitution mean for humans?"

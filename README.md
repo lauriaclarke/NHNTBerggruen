@@ -37,7 +37,7 @@ Installation at the Berggruen Institute, Spring 2023
 
 2. run updater script
     - if you forget how to use it you can run the help command
-        > ```python3 run/runnhnt.py --help
+        > ```python3 run/runnhnt.py --help```
     - check you're in the top level of the repo then run the updater script
     - example for updating se4 and se5:
         > ```python3 run/runnhnt.py -c update -d se4 se5```

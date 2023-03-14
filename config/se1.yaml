@@ -8,15 +8,16 @@ output_device: 0
 input_device: 1
 
 # name of the pair
-pair_name: se3
-
-# number of devices in the conversation group
-group_count: 3
+pair_name: se2
 
 # number of messages this pair will send back and forth
 exchange_count: 200
 
 # protocol
+# 0 - slow audible
+# 1 - fast 
+# 2 - fastest
+# 4 - fast ultrasonic
 protocol: 4
 
 # volume
@@ -31,9 +32,8 @@ pitch: 20
 # can be send or receive
 mode: send
 
-# the contectual information to accompany text prompt send to GPT-3
-pre_prompt: "Answer this question from the perspective of a house plant: "
-
+# question this plant will ask at the beginning
 start_question: "who is a human?"
 
+# question to respond to if there's a timeout
 timeout_response: "what does a multispecies constitution mean for humans?"
