@@ -34,7 +34,7 @@ The flow of conversation is: SE1 -> SE2 -> SE3 -> SE1 etc.
 
 - SE1 begins the conversation by asking a question to SE2. It is configured to use an untrained instance of GPT-3.
 - SE2 uses a fine-tuned instance of GPT-3 and responds to the question. 
-- SE3 then responds addressing its response to SE1
+- SE3 uses a file-tuned instance of GPT-3 and then responds to SE2, addressing its response to SE1
 
 
 ### Group of Two

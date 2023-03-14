@@ -32,6 +32,7 @@ pitch: 20
 # can be send or receive
 mode: send
 
+# question this plant will ask at the beginning
 start_question: "who is a human?"
 
 # question to respond to if there's a timeout

@@ -24,7 +24,8 @@ protocol: 1
 volume: 30
 
 # GPT-3 model used
-model: text-davinci-003
+# model: text-davinci-003
+model: davinci:ft-parsons-school-of-design-2023-03-13-10-39-27
 
 # negative values lower pitch, positive values increase it
 pitch: 20
@@ -32,9 +33,7 @@ pitch: 20
 # can be send or receive
 mode: receive
 
-# the contectual information to accompany text prompt send to GPT-3
-pre_prompt: "Ask a question from the perspective of a crop on a farm: "
-
+# question this plant will ask at the beginning
 start_question: "who is a human?"
 
 # question to respond to if there's a timeout
