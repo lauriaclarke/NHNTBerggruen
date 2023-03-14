@@ -30,7 +30,7 @@ model: text-davinci-003
 pitch: 15
 
 # can be send or receive
-mode: send
+mode: receive
 
 # question this plant will ask at the beginning
 start_question: "who is a human?"
