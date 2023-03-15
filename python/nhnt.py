@@ -41,7 +41,7 @@ stop = ["."]
 firstStringSend = "ask a question about this statement"
 firstStringReceive= "respond to this question"
 middleString = "from the perpspective of"
-perspectiveStringA = ["a river", "an environmental scientist", "a politician", "a houseplant", "a wildflower", "a geographer", "a philosopher"]
+perspectiveStringA = ["an environmental scientist", "a philosopher", "a politician", "a houseplant", "a wildflower", "a geographer", "a river"]
 perspectiveStringB = ["discussing planetary computation", "who hates humans", "who is trying to improve their community", "attending a workshop on multispecies communication", "trying to build a multispecies constitution", "discussing planetary governance", "trying to mitigate climate change", ""]
 perspectiveA = cycle(perspectiveStringA)
 perspectiveB = cycle(perspectiveStringB)
@@ -180,7 +180,7 @@ def sendGGWaveUT(config, inputText):
         stringToSend = header + toSend[i]
         
         # generate audio waveform for encoded text
-        ggwaveWaveform = ggwave.encode(stringToSend, protocolId = config.get('protocol'), volume = 50) #config.get('volume'))
+        ggwaveWaveform = ggwave.encode(stringToSend, protocolId = config.get('protocol'), volume = config.get('volume'))
     
         ggwaveOut = np.frombuffer(ggwaveWaveform, 'float32')
 
@@ -462,7 +462,9 @@ def converseSingle(config, persp, currentResponses):
     prompt = preprompt + responses[-1] + "\n"
     
     print(prompt)
-    
+
+
+    check = False 
     
     while check == False:
 
