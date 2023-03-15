@@ -24,7 +24,7 @@ protocol: 4
 volume: 90
 
 # GPT-3 model used
-model: text-davinci-003
+model: davinci:ft-parsons-school-of-design-2023-03-13-10-39-27
 
 # negative values lower pitch, positive values increase it
 pitch: 15
