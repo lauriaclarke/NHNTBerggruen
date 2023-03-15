@@ -8,20 +8,20 @@ output_device: 0
 input_device: 1
 
 # name of the pair
-pair_name: se4
+pair_name: se2
 
 # number of messages this pair will send back and forth
 exchange_count: 200
 
 # protocol
 # 0 - slow audible
-# 1 - fast 
+# 1 - fast
 # 2 - fastest
 # 4 - fast ultrasonic
-protocol: 1
+protocol: 4
 
 # volume
-volume: 30
+volume: 90
 
 # GPT-3 model used
 # model: text-davinci-003
@@ -31,7 +31,7 @@ model: davinci:ft-parsons-school-of-design-2023-03-13-10-39-27
 pitch: 15
 
 # can be send or receive
-mode: receive
+mode: send
 
 # question this plant will ask at the beginning
 start_question: "who is a human?"
