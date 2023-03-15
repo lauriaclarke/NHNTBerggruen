@@ -521,8 +521,8 @@ def mp3tonp(f, normalized=False):
 
 def getConfig():
     username = subprocess.check_output(['hostname'], encoding='utf-8').strip()
-    configName = "/home/se/Documents/NHNTBerggruen/config/" + username + ".yaml"
-    # configName = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/config/" + username + ".yaml"
+    # configName = "/home/se/Documents/NHNTBerggruen/config/" + username + ".yaml"
+    configName = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/config/" + username + ".yaml"
 
     with open(configName, 'r') as file:
         config = yaml.safe_load(file)
@@ -551,14 +551,16 @@ def main():
     alsaErrorHandling()
 
     # create a log file
-    os.makedirs("/home/se/Documents/NHNTBerggruen/logs/", exist_ok = True)
-    t = datetime.datetime.now()
-    filename = "/home/se/Documents/NHNTBerggruen/logs/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
-    f = open(filename, "w")
-    # os.makedirs("/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs/", exist_ok = True)
+
+    # os.makedirs("/home/se/Documents/NHNTBerggruen/logs/", exist_ok = True)
     # t = datetime.datetime.now()
-    # filename = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
+    # filename = "/home/se/Documents/NHNTBerggruen/logs/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
     # f = open(filename, "w")
+
+    os.makedirs("/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs/", exist_ok = True)
+    t = datetime.datetime.now()
+    filename = "/home/lauria/Documents/mfadt/research/NHNTBerggruen/logs/" + t.strftime("%m_%d_%H_%M_%S") + ".txt"
+    f = open(filename, "w")
     
     # wait for start command
     waitForStart(config)
@@ -569,10 +571,13 @@ def main():
     # if we're in receive mode first then just start with a blank array
     responses = [config.get("start_question")]
 
+
+    TIMEOUT = config.get("timeout")
+    print("timeout for this plant: " + str(TIMEOUT))
+
     # a flag to keep track
     if config.get('mode') == "send":
         sendReceive = True
-        TIMEOUT = 40
     else:
         sendReceive = False
 

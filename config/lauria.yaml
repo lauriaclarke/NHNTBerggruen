@@ -35,10 +35,13 @@ model: text-davinci-003
 pitch: 15
 
 # can be send or receive
-mode: send
+mode: receive
 
 # the question to start with if we're in send mode
 start_question: "who is a human?"
 
 # question to ask in the case of a timeout
 timeout_response: "what does a multispecies constitution mean for humans?"
+
+# timeout duration
+timeout: 100
