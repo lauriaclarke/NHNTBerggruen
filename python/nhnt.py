@@ -19,6 +19,7 @@ from gtts import gTTS
 from itertools import cycle
 import audio2numpy as a2n
 import random
+from textwrap import TextWrapper
 
 
 TIMEOUT=20
@@ -96,15 +97,17 @@ def sendGGWave(config, inputText):
     # get the recipient number from config file
     recipient =  re.sub('\D', '', config.get('pair_name'))
 
-    toSend = []
-    if len(inputText) > MAX_STRING:
-        i = 0
-        while i < len(inputText):
-            i += MAX_STRING
-            toSend.append(inputText[i - MAX_STRING:i])
-    else:
-        toSend.append(inputText)
+    # toSend = []
+    # if len(inputText) > MAX_STRING:
+    #     i = 0
+    #     while i < len(inputText):
+    #         i += MAX_STRING
+    #         toSend.append(inputText[i - MAX_STRING:i])
+    # else:
+    #     toSend.append(inputText)
 
+    w = TextWrapper(MAX_STRING, break_long_words=True)
+    toSend = w.wrap(inputText)
 
     # print(toSend) 
     
@@ -146,15 +149,17 @@ def sendGGWaveUT(config, inputText):
     # split strings that are too long into chunks of length MAX_STRING characters
     # TODO: end on word breaks instead of mid-word
     
-    toSend = []
-    if len(inputText) > MAX_STRING:
-        i = 0
-        while i < len(inputText):
-            i += MAX_STRING
-            toSend.append(inputText[i - MAX_STRING:i])
-    else:
-        toSend.append(inputText)
+    # toSend = []
+    # if len(inputText) > MAX_STRING:
+    #     i = 0
+    #     while i < len(inputText):
+    #         i += MAX_STRING
+    #         toSend.append(inputText[i - MAX_STRING:i])
+    # else:
+    #     toSend.append(inputText)
 
+    w = TextWrapper(MAX_STRING, break_long_words=True)
+    toSend = w.wrap(inputText)
 
     # print(toSend) 
     
@@ -458,11 +463,27 @@ def converseSingle(config, persp, currentResponses):
     
     print(prompt)
     
-    # get the completion from model
-    completion = openai.Completion.create(engine=model, prompt=prompt, max_tokens=MAX_TOKENS, stop=stop)
-
-    responseString = completion.choices[0].text.strip()
     
+    while check == False:
+
+        # get the completion from model
+        completion = openai.Completion.create(engine=model, prompt=prompt, max_tokens=MAX_TOKENS, stop=stop)
+
+        # get the string
+        responseString = completion.choices[0].text
+
+        # remove any newlines
+        responseString = responseString.replace('\n', ' ')
+
+        # strip spaces and punctuation to check for real characters
+        stringCheck = re.sub('[^A-Za-z0-9]+', '', responseString)
+
+        if stringCheck.isalpha() and isEnglish(stringCheck):
+            check = True
+        else:
+            print("*** BAD OUTPUT STRING, REDOING QUERY ***")
+
+ 
     fullResponse = responseString + "\n"
 
     # add the formatted string to the list
@@ -505,6 +526,14 @@ def getConfig():
         config = yaml.safe_load(file)
 
     return config
+
+def isEnglish(s):
+    try:
+        s.encode(encoding='utf-8').decode('ascii')
+    except UnicodeDecodeError:
+        return False
+    else:
+        return True
 
 # state machine:
 #   query gpt3

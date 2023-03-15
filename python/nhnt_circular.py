@@ -548,10 +548,28 @@ def main():
         print("prompt:: " + prompt)
         f.write("prompt:: " + prompt)
 
-        # get the completion from model
-        completion = openai.Completion.create(engine=model, prompt=prompt, max_tokens=MAX_TOKENS, stop=stop)
 
-        responseString = completion.choices[0].text.strip()
+        check = False
+
+        while check == False:
+
+            # get the completion from model
+            completion = openai.Completion.create(engine=model, prompt=prompt, max_tokens=MAX_TOKENS, stop=stop)
+
+            # get the string
+            responseString = completion.choices[0].text
+
+            # remove any newlines
+            responseString = responseString.replace('\n', ' ')
+
+            # strip spaces and punctuation to check for real characters
+            stringCheck = re.sub('[^A-Za-z0-9]+', '', responseString)
+
+            elif stringCheck.isalnum() and isEnglish(stringCheck):
+                check = True
+            else:
+                print("*** BAD OUTPUT STRING, REDOING QUERY ***")
+
  
         fullResponse = responseString + "\n"
         
@@ -562,6 +580,15 @@ def main():
         responses.append(fullResponse)
 
     f.close()
+
+
+def isEnglish(s):
+    try:
+        s.encode(encoding='utf-8').decode('ascii')
+    except UnicodeDecodeError:
+        return False
+    else:
+        return True
 
 
 
