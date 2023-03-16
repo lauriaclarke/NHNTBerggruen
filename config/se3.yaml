@@ -40,4 +40,4 @@ start_question: "who is a human?"
 timeout_response: "what does a multispecies constitution mean for humans?"
 
 # timeout duration
-timeout: 20 
+timeout: 30 
